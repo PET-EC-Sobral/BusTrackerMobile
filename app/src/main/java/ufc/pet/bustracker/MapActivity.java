@@ -66,9 +66,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // Posiciona o mapa em Sobral
         LatLng sobral = new LatLng(-3.6906438,-40.3503957);
         busMarkers = new Marker[2];
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sobral, 14));
+
+        // Adiciona marcadores para os ônibus
         busMarkers[0] = mMap.addMarker(new MarkerOptions().position(sobral));
         busMarkers[1] = mMap.addMarker(new MarkerOptions().position(sobral));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sobral, 14));
+
+        sendRequest();
     }
 
     /**
