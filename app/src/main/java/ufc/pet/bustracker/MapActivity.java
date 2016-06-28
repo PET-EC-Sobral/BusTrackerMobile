@@ -34,7 +34,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private Marker[] busMarkers;
 
     // Parâmetros da conexão
-    private static final String JSON_URL = "http://random_locations.netne.net/coords.json";
+    private static final String JSON_URL = "http://loginsigaa.net23.net/coords.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
