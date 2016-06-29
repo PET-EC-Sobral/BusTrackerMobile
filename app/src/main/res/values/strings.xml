@@ -4,4 +4,6 @@
     <string name="about">Sobre</string>
     <string name="notifications">Notificações</string>
     <string name="update">Atualizar</string>
+    <string name="activate_update">Ativar atualizações</string>
+    <string name="deactivate_update">Desativar atualizações</string>
 </resources>

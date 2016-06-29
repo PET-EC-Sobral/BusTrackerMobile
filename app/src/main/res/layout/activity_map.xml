@@ -31,6 +31,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:layout_centerHorizontal="true"
-            android:text="@string/update" />
+            android:text="@string/update"/>
     </RelativeLayout>
 </LinearLayout>

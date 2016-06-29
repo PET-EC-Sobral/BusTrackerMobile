@@ -2,6 +2,7 @@ package ufc.pet.bustracker;
 
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -27,6 +28,11 @@ import java.util.ArrayList;
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback,
         View.OnClickListener {
 
+    // Controle das requisiçoes periódicas
+    private Handler handler;
+    private Runnable r;
+    private boolean updateActivated = false;
+
     // Elementos da interface
     private GoogleMap mMap;
     private Toolbar mToolbar;
@@ -34,12 +40,23 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private Marker[] busMarkers;
 
     // Parâmetros da conexão
-    private static final String JSON_URL = "http://loginsigaa.net23.net/coords.json";
+    private static final String JSON_URL = "http://random_locations.netne.net/coords.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        /** Configura as requisições periódicas
+        handler = new Handler();
+        r = new Runnable(){
+            @Override
+            public void run(){
+                // Efetua uma nova requisição a cada 3s
+                sendRequest();
+                handler.postDelayed(r, 3000);
+            }
+        }; **/
 
         // Localiza elementos da interface
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -89,7 +106,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
      */
     @Override
     public void onClick(View v){
+
         sendRequest();
+        /**
+        if(updateActivated){
+            mUpdateButton.setText(R.string.activate_update);
+            handler.removeCallbacks(r);
+        } else {
+            mUpdateButton.setText(R.string.deactivate_update);
+            handler.post(r);
+        }
+        updateActivated = !updateActivated;
+         **/
     }
 
     /**
