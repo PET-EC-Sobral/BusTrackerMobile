@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/filterVisualization"
+        android:icon="@drawable/ic_filter_list_black_24dp"
+        android:title="@string/filterVisualization"
+        app:showAsAction="always">
+    </item>
     <item android:title="@string/settings"
         android:orderInCategory="100"/>
     <item android:title="@string/about"

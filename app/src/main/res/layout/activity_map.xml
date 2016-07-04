@@ -13,24 +13,22 @@
         android:theme="@style/AppTheme.ActionBarOverlay"
         app:popupTheme="@style/AppTheme.PopupOverlay"
         />
-    <fragment
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        />
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/update_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_centerHorizontal="true"
-            android:text="@string/update"/>
-    </RelativeLayout>
+        android:gravity="bottom"
+        app:umanoPanelHeight="100dp"
+        app:umanoShadowHeight="2dp"
+        app:umanoParallaxOffset="5dp">
+        <fragment
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
+        <include layout="@layout/info_layout"/>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 </LinearLayout>
