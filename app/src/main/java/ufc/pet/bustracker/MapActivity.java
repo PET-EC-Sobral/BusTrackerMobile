@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -53,7 +54,7 @@ public class MapActivity extends AppCompatActivity implements
         mInfoDescription = (TextView) findViewById(R.id.info_description);
         mUpdateButton = (Button) findViewById(R.id.update_button);
 
-        connectionManager = new ConnectionManager(this, getResources().getString(R.string.host_prefix));
+        connectionManager = new ConnectionManager(getApplicationContext(), getResources().getString(R.string.host_prefix));
 
         // Configura elementos da interface
         setSupportActionBar(mToolbar);
@@ -90,11 +91,12 @@ public class MapActivity extends AppCompatActivity implements
             }
         }
         p.setColor(selected);
-        LatLng routeStart = p.getPoints().get(0);
-        LatLng routeEnd = p.getPoints().get(p.getPoints().size()-1);
-        LatLng mean = new LatLng( (routeStart.latitude + routeEnd.latitude)/2,
-                (routeStart.longitude + routeEnd.longitude) / 2);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mean, 15.5f));
+        LatLngBounds.Builder b = new LatLngBounds.Builder();
+        for(LatLng l : p.getPoints()){
+            b.include(l);
+        }
+        LatLngBounds bounds = b.build();
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
     }
 
     /**
