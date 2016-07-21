@@ -6,4 +6,21 @@
     <string name="notifications">Notificações</string>
     <string name="update">Atualizar</string>
     <string name="filterVisualization">Filtrar Visualização</string>
+    <string name="back">Voltar</string>
+
+    <string name="title_developers">Equipe de Desenvolvimento</string>
+    <string name="developers">
+        Abner Sousa Nascimento\nEloise de Carvalho Rodrigues\nFrancisco Thales Rocha Sousa\nIran
+        Mesquita Braga Junior\nIsaac Ben Judá C. B. de Senna Dourado\nIsaac Newton Melo
+        Machado\nLaercio Santana Rodrigues\nMagdiel Campelo Alves de Sousa\nNicollas Souza
+        Batista\nNiltomar Rodrigues da Silva\nRaimundo Farrapo Pinto Júnior\nSyllas Rangel
+        Carneiro Magalhães
+    </string>
+
+    <string name="title_tutors">Tutores</string>
+    <string name="tutors">
+        Luís Eduardo Araripe Gomes da Silva\nIális Cavalcante de Paula Júnior
+    </string>
+
+    <string name="site">www.pet.ec.ufc.br</string>
 </resources>
