@@ -7,7 +7,11 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import ufc.pet.bustracker.MapActivity;
+import ufc.pet.bustracker.ufc.pet.bustracker.types.Bus;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Route;
 
 public class JSONParser {
@@ -34,5 +38,25 @@ public class JSONParser {
             Log.e(MapActivity.TAG, e.getMessage());
         }
         return r;
+    }
+
+    public Bus parseBus(JSONObject ob) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd kk:mm:ss");
+        Bus b = new Bus();
+        try {
+            b.setId(ob.getInt("id_bus"));
+            b.setVelocity(ob.getDouble("velocity"));
+            JSONArray lastLocalizations = ob.getJSONArray("lastLocalizations");
+            JSONObject locationInfo = lastLocalizations.getJSONObject(0);
+            Double lat = locationInfo.getDouble("latitude");
+            Double lng = locationInfo.getDouble("longitude");
+            Date d = new Date();
+            d = df.parse(locationInfo.getString("date"));
+            b.setCoordinates(new LatLng(lat, lng));
+            b.setLastUpdate(d);
+        } catch (Exception e) {
+            Log.e(MapActivity.TAG, e.getMessage());
+        }
+        return b;
     }
 }
