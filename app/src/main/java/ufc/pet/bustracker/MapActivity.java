@@ -93,7 +93,6 @@ public class MapActivity extends AppCompatActivity implements
             case R.id.update_button:
                 progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
                         "Carregando informações");
-                Toast.makeText(getApplicationContext(), "Atualizando...", Toast.LENGTH_LONG);
                 getRoutesFromServer();
                 break;
         }

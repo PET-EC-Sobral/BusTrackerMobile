@@ -3,7 +3,6 @@
     <string name="host_prefix">http://santana.azurewebsites.net/BusTrackerAPI/index.php</string>
     <string name="settings">Configurações</string>
     <string name="about">Sobre</string>
-    <string name="notifications">Notificações</string>
     <string name="update">Atualizar</string>
     <string name="filterVisualization">Filtrar Visualização</string>
 </resources>
