@@ -4,6 +4,7 @@ package ufc.pet.bustracker;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,6 +20,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,6 +38,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import ufc.pet.bustracker.tools.CustomJsonArrayRequest;
+import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
 import ufc.pet.bustracker.tools.JSONParser;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Bus;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Route;
@@ -62,6 +66,9 @@ public class MapActivity extends AppCompatActivity implements
     // Gerenciador de conectividade
     private RequestQueue requestQueue;
     private String serverPrefix;
+
+    // Handler para lidar com atualização/notificação automática
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +100,8 @@ public class MapActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.update_button:
-                progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
-                        "Carregando informações");
+                //progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
+                //        "Carregando informações");
                 getRoutesFromServer();
                 break;
         }
@@ -124,25 +131,27 @@ public class MapActivity extends AppCompatActivity implements
         }
         LatLngBounds bounds = b.build();
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
-        getBusesOnRoute(87);
+        getBusesOnRoute(86);
+        handler.postDelayed(updateBus, 0);
     }
 
     public void getRoutesFromServer() {
-        String url = serverPrefix + "/routes/?points=true";
-        JsonArrayRequest jreq = new JsonArrayRequest(JsonArrayRequest.Method.GET, url, null,
-                new Response.Listener<JSONArray>() {
+        String url = serverPrefix + "/routes/86"; // apenas uma rota por que só ela está atualizada com ônibus
+        Log.e("teste", url);
+        //token para teste
+        String token = "Rs1cFdbn9yOY7V\\/SYWmVIbj3PYvVZo+H7WhLd9GOQ3lCwMhgPzot2WRm4hx25i+wrrmhkX5InH5ZlbaLJ2hPLiK9ThVwgSAWSY5T\\/v1hoztNESEWtTPX+2YcwfJ\\/p7kDftRatLTDcpFZ2Dn\\/7LhEwNUn35OafWyA+Cus9wRQ0n3I6xMoWSjGXj1IAgJi44BrKex\\/PMS7lWm0ZK261Wksx4Vj0\\/YRQJgzsGMluG8HNes=";
+        JsonObjectRequest jreq = new CustomJsonObjectRequest(JsonObjectRequest.Method.GET, url, null,token ,
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(JSONArray response) {
+                    public void onResponse(JSONObject response) {
                         JSONParser parser = new JSONParser();
                         try {
-                            for (int i = 0; i < response.length(); i++) {
-                                JSONObject ob = response.getJSONObject(i);
-                                Route r = parser.parseRoute(ob);
-                                routes.add(r);
-                            }
+
+                            Route r = parser.parseRoute(response);
+                            routes.add(r);
+
                             drawRoutesOnMap();
-                            progressDialog.dismiss();
-                        } catch (Exception e) {
+                        } catch (Exception e){
                             Log.e(MapActivity.TAG, e.getMessage());
                         }
                     }
@@ -150,7 +159,7 @@ public class MapActivity extends AppCompatActivity implements
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        Log.e("fuuudeu", error.toString());
                     }
                 });
         requestQueue.add(jreq);
@@ -158,7 +167,9 @@ public class MapActivity extends AppCompatActivity implements
 
     public void getBusesOnRoute(int id) {
         String url = serverPrefix + "/routes/" + id + "/buses?localizations=1";
-        JsonArrayRequest jreq = new JsonArrayRequest(JsonArrayRequest.Method.GET, url, null,
+        //token para teste
+        String token = "Rs1cFdbn9yOY7V\\/SYWmVIbj3PYvVZo+H7WhLd9GOQ3lCwMhgPzot2WRm4hx25i+wrrmhkX5InH5ZlbaLJ2hPLiK9ThVwgSAWSY5T\\/v1hoztNESEWtTPX+2YcwfJ\\/p7kDftRatLTDcpFZ2Dn\\/7LhEwNUn35OafWyA+Cus9wRQ0n3I6xMoWSjGXj1IAgJi44BrKex\\/PMS7lWm0ZK261Wksx4Vj0\\/YRQJgzsGMluG8HNes=";
+        JsonArrayRequest jreq = new CustomJsonArrayRequest(JsonArrayRequest.Method.GET, url, null, token,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
@@ -217,6 +228,20 @@ public class MapActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Atualizar os ônibus automaticamente no mapa
+     */
+    Runnable updateBus = new Runnable(){
+        @Override
+        public void run(){
+            for(Route r : routes){
+                if(r.isActiveOnMap()) {
+                    markBusesOnMap();
+                }
+            }
+            handler.postDelayed(updateBus, 3000);
+        }
+    };
     /**
      * Fornece um manipulador para o objeto do mapa
      */

@@ -3,6 +3,7 @@ package ufc.pet.bustracker.tools;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,18 +23,13 @@ public class JSONParser {
             r.setName(ob.getString("name"));
             r.setDescription(ob.getString("description"));
             JSONArray id_buses = ob.getJSONArray("id_buses");
-            JSONArray points = ob.getJSONArray("points");
+            String polylineCode = ob.getJSONObject("googleRoute").getJSONArray("routes").getJSONObject(0).getJSONObject("overview_polyline").getString("points");
+            r.setPoints(PolyUtil.decode(polylineCode));
             for(int i = 0; i < id_buses.length(); i++){
                 int id = id_buses.getInt(i);
                 r.getId_buses().add(id);
             }
-            for(int i = 0; i < points.length(); i++){
-                JSONObject point = points.getJSONObject(i);
-                Double lat = point.getDouble("latitude");
-                Double lng = point.getDouble("longitude");
-                LatLng p = new LatLng(lat, lng);
-                r.getPoints().add(p);
-            }
+
         } catch (Exception e){
             Log.e(MapActivity.TAG, e.getMessage());
         }
@@ -50,7 +46,7 @@ public class JSONParser {
             JSONObject locationInfo = lastLocalizations.getJSONObject(0);
             Double lat = locationInfo.getDouble("latitude");
             Double lng = locationInfo.getDouble("longitude");
-            Date d = new Date();
+            Date d;
             d = df.parse(locationInfo.getString("date"));
             b.setCoordinates(new LatLng(lat, lng));
             b.setLastUpdate(d);
