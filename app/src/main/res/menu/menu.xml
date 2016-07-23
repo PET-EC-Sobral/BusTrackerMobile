@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:title="@string/settings"
-        android:onClick="onClickSettingst"
+        android:onClick="onClickSettings"
         android:orderInCategory="100"/>
     <item android:title="@string/about"
         android:onClick="onClickAbout"
