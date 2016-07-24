@@ -100,8 +100,8 @@ public class MapActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.update_button:
-                //progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
-                //        "Carregando informações");
+                progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
+                        "Carregando informações");
                 getRoutesFromServer();
                 break;
         }
@@ -149,7 +149,7 @@ public class MapActivity extends AppCompatActivity implements
 
                             Route r = parser.parseRoute(response);
                             routes.add(r);
-
+                            progressDialog.dismiss();
                             drawRoutesOnMap();
                         } catch (Exception e){
                             Log.e(MapActivity.TAG, e.getMessage());
@@ -217,7 +217,7 @@ public class MapActivity extends AppCompatActivity implements
     public void markBusesOnMap() {
         for (Bus b : buses) {
             if (b.isActiveOnMap())
-                return;
+                b.getAssociatedMarker().remove();
             Log.e(MapActivity.TAG, "Chegou aqui");
             Marker m = mMap.addMarker(
                     new MarkerOptions()
