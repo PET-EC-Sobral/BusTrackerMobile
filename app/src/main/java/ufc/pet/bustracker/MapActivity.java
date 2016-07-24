@@ -61,6 +61,7 @@ public class MapActivity extends AppCompatActivity implements
     private Button mUpdateButton;
     private ArrayList<Route> routes;
     private ArrayList<Bus> buses;
+    private ArrayList<Marker> busOnScreen;
     private ProgressDialog progressDialog;
 
     // Gerenciador de conectividade
@@ -84,6 +85,7 @@ public class MapActivity extends AppCompatActivity implements
         requestQueue = Volley.newRequestQueue(getApplicationContext());
         routes = new ArrayList<>(0);
         buses = new ArrayList<>(0);
+        busOnScreen = new ArrayList<>();
         serverPrefix = getResources().getString(R.string.host_prefix);
 
         // Configura elementos da interface
@@ -160,6 +162,7 @@ public class MapActivity extends AppCompatActivity implements
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e("fuuudeu", error.toString());
+                        progressDialog.dismiss();
                     }
                 });
         requestQueue.add(jreq);
@@ -175,6 +178,7 @@ public class MapActivity extends AppCompatActivity implements
                     public void onResponse(JSONArray response) {
                         JSONParser parser = new JSONParser();
                         try {
+                            buses.clear();
                             for (int i = 0; i < response.length(); i++) {
                                 JSONObject ob = response.getJSONObject(i);
                                 Bus b = parser.parseBus(ob);
@@ -215,6 +219,28 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     public void markBusesOnMap() {
+        if(busOnScreen.size() != 0){
+            for(int i = 0; i < busOnScreen.size(); i++){
+                busOnScreen.get(i).remove();
+            }
+            busOnScreen.clear();
+
+        }
+        for (Bus b : buses) {
+            Log.e(MapActivity.TAG, "Chegou aqui");
+            Marker m = mMap.addMarker(
+                    new MarkerOptions()
+                            .position(b.getCoordinates())
+                            .title("Ônibus " + b.getId())
+            );
+            busOnScreen.add(m);
+            b.setAssociatedMarker(m);
+        }
+
+
+        /* Não funciona... por algum motivo? Acredito que os marcadores
+        que ficam salvos nos objetos perdem a referência no mapa, aí quando vem um novo
+        ele não remove, mesmo quando a função remove() é chamada
         for (Bus b : buses) {
             if (b.isActiveOnMap())
                 b.getAssociatedMarker().remove();
@@ -225,7 +251,7 @@ public class MapActivity extends AppCompatActivity implements
                             .title("Ônibus " + b.getId())
             );
             b.setAssociatedMarker(m);
-        }
+        }*/
     }
 
     /**
@@ -236,7 +262,7 @@ public class MapActivity extends AppCompatActivity implements
         public void run(){
             for(Route r : routes){
                 if(r.isActiveOnMap()) {
-                    markBusesOnMap();
+                    getBusesOnRoute(r.getId_routes());
                 }
             }
             handler.postDelayed(updateBus, 3000);
