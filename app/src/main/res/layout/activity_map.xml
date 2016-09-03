@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
-        app:umanoPanelHeight="100dp"
+        app:umanoPanelHeight="110dp"
         app:umanoShadowHeight="2dp"
         app:umanoParallaxOffset="5dp">
         <fragment
