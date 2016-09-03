@@ -96,6 +96,10 @@ public class MapActivity extends AppCompatActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
+                "Carregando informações");
+        getRoutesFromServer();
     }
 
     @Override
