@@ -38,6 +38,16 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+
 import ufc.pet.bustracker.tools.CustomJsonArrayRequest;
 import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
 import ufc.pet.bustracker.tools.JSONParser;
@@ -218,6 +228,10 @@ public class MapActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Marca os ônibus no mapa de acordo com os que estão ativos, dado o vetor buses
+     * que é preenchido no recebimento da informação do servidor na funçao getBusesOnRoute.
+     */
     public void markBusesOnMap() {
         if(busOnScreen.size() != 0){
             for(int i = 0; i < busOnScreen.size(); i++){
@@ -298,4 +312,6 @@ public class MapActivity extends AppCompatActivity implements
     public void onClickSettings(MenuItem item){
         return;
     }
+
+
 }

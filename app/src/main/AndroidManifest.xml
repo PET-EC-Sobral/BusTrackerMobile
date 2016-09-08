@@ -42,6 +42,21 @@
             android:label="@string/about"
             android:parentActivityName=".MapActivity">
         </activity>
+
+        <service
+            android:name=".FirebaseService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <!--
+        <service
+            android:name=".FirebaseService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service> !-->
+
     </application>
 
 </manifest>
