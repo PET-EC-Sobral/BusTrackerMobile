@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context="ufc.pet.bustracker.SettingsActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:theme="@style/AppTheme.ActionBarOverlay"
+
+        />
+
+    <TextView
+        android:id="@+id/texto_intervalos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text = "@string/text_update"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop= "80dp"
+        android:layout_marginLeft = "16dp"
+        android:layout_marginStart = "16dp"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        />
+
+    <Spinner
+        android:id = "@+id/intervalos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+
+        android:layout_alignBaseline="@id/texto_intervalos"
+        android:layout_marginEnd = "16dp"
+        android:layout_marginRight = "16dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        > </Spinner>
+
+    <TextView
+        android:id="@+id/texto_descricao"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop = "@id/texto_intervalos"
+        android:layout_alignStart="@id/texto_intervalos"
+        android:layout_alignLeft="@id/texto_intervalos"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd = "16dp"
+        android:layout_marginRight = "16dp"
+        android:layout_marginTop="32dp"
+        android:text = "@string/descrição_update"/>
+
+    <TextView
+        android:id="@+id/notificacoes_texto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop ="@id/texto_descricao"
+        android:layout_marginTop = "96dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft = "16dp"
+        android:layout_marginStart = "16dp"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:text= "@string/text_notification"/>
+
+    <Switch
+        android:id="@+id/notificacoes_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/notificacoes_texto"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd = "16dp"
+        android:layout_marginRight = "16dp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop = "@id/notificacoes_texto"
+        android:layout_alignStart="@id/notificacoes_texto"
+        android:layout_alignLeft="@id/notificacoes_texto"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd = "16dp"
+        android:layout_marginRight = "16dp"
+        android:layout_marginTop="32dp"
+        android:text = "@string/descrição_noticação"/>
+</RelativeLayout>

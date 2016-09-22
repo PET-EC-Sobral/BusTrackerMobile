@@ -7,6 +7,7 @@
     <string name="filterVisualization">Filtrar Visualização</string>
     <string name="back">Voltar</string>
 
+    <!-- Activity de Sobre !-->
     <string name="title_developers">Equipe de Desenvolvimento</string>
     <string name="developers">
         Abner Sousa Nascimento\nEloise de Carvalho Rodrigues\nFrancisco Thales Rocha Sousa\nIran
@@ -26,4 +27,18 @@
     <string name="site_pet"><a href="https://www.pet.ec.ufc.br">www.pet.ec.ufc.br</a></string>
     <string name="site_ufc_sobral"><a href="https://www.sobral.ufc.br/">www.sobral.ufc.br</a></string>
     <string name="site_ufc"><a href="https://www.ufc.br/">www.ufc.br</a></string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Activity de Configurações !-->
+
+    <string name="configurações">Configurações</string>
+    <string name="text_update">Intervalo de Atualizações</string>
+    <string name="descrição_update">Definir o intervalo entre as atualizações dos marcadores dos ônibus no mapa em segundos. Mantenha esse valor alto para economizar dados de sua rede móvel, ou um valor baixo para máxima precisão.</string>
+    <string name="text_notification">Receber Notificações</string>
+    <string name="descrição_noticação">Caso você decida não ser mais incomodado com as notificações do motorista do ônibus. Porém, você ainda poderá consultar as mensagens a partir da tela de Mensagens</string>
+
+    <!-- Shared Preferences !-->
+    <string name="preferences">Configurações</string>
+    <string name="update_time">Tempo de Intervalos</string>
+    <string name="notifications">Notificações</string>
 </resources>

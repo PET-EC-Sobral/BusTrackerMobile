@@ -10,9 +10,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
+        android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:name="android.support.multidex.MultiDexApplication"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -41,13 +41,16 @@
         <activity
             android:name=".AboutActivity"
             android:label="@string/about"
-            android:parentActivityName=".MapActivity">
-        </activity>
+            android:parentActivityName=".MapActivity" />
 
-        <service
-            android:name=".FirebaseService">
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/configurações"
+            android:parentActivityName=".MapActivity" />
+
+        <service android:name=".FirebaseService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <!--
@@ -56,7 +59,9 @@
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
-        </service> !-->
+        </service> !
+        -->
+
 
     </application>
 

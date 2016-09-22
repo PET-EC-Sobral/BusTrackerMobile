@@ -20,7 +20,5 @@ public class AboutActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    public void onClickBack() {
-        this.finish();
-    }
+
 }

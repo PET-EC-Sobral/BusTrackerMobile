@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
@@ -30,7 +31,10 @@ public class FirebaseService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             Log.d("Mermão", "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
-        notificar("manolo IT IS WORKING!!!!");
+
+        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        if(pref.getBoolean(getString(R.string.notifications), true))
+            notificar("manolo IT IS WORKING!!!!");
     }
 
     private void notificar(String messageBody) {

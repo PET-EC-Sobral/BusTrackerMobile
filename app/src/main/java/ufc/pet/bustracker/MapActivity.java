@@ -3,6 +3,7 @@ package ufc.pet.bustracker;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -110,6 +111,8 @@ public class MapActivity extends AppCompatActivity implements
         progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
                 "Carregando informações");
         getRoutesFromServer();
+
+
     }
 
     @Override
@@ -283,7 +286,10 @@ public class MapActivity extends AppCompatActivity implements
                     getBusesOnRoute(r.getId_routes());
                 }
             }
-            handler.postDelayed(updateBus, 3000);
+            // Verifica o tempo de atualização definido pelo usuário em configurações
+            SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+            int update_time = pref.getInt(getString(R.string.update_time), 3);
+            handler.postDelayed(updateBus, update_time);
         }
     };
     /**
@@ -314,7 +320,7 @@ public class MapActivity extends AppCompatActivity implements
 
 
     public void onClickSettings(MenuItem item){
-        return;
+        startActivity(new Intent(MapActivity.this, SettingsActivity.class));;
     }
 
 
