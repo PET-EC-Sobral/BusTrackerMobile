@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,8 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -48,8 +51,16 @@ public class SplashActivity extends AppCompatActivity {
 
             if (token.equals("null"))
                 getTokenIfExists();
-            else
-                iniciar();
+            else {
+                new Handler().postDelayed(new Runnable(){
+                    @Override
+                    public void run(){
+
+                        iniciar();
+                    }
+                }, 300);
+
+            }
         }
     }
 
@@ -171,5 +182,39 @@ public class SplashActivity extends AppCompatActivity {
     public void iniciar(){
         Intent intent = new Intent(SplashActivity.this, MapActivity.class);
         startActivity(intent);
+    }
+
+    public void sendToken(String token_firebase){
+        String server = getString(R.string.host_prefix) + "/routes/86/messages";
+        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        String token = pref.getString(getString(R.string.token), "null");
+        Log.e("token send", token);
+        JSONObject dado = null;
+        try{
+            dado = new JSONObject("{\"registration_token_firebase\": \""+token_firebase+"\"}");
+        }
+        catch(JSONException e){
+            Log.e("deu erro", "no token firebase");
+        }
+        JsonObjectRequest request = new CustomJsonObjectRequest(Request.Method.POST, server, dado, token,
+                new Response.Listener<JSONObject>(){
+                    @Override
+                    public void onResponse(JSONObject Response){
+                        Log.i("Registro deu certo!", "No firebase pra mensanges");
+                    }
+                },
+                new Response.ErrorListener(){
+                    @Override
+                    public void onErrorResponse(VolleyError error){
+                        Log.e("Erro em Registro", "Vai lá ver, Firebase");
+                    }
+                });
+        requestQueue.add(request);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        finish();
     }
 }

@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -36,6 +37,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -102,6 +104,14 @@ public class MapActivity extends AppCompatActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        String firebase = pref.getString(getString(R.string.firebase), "null");
+        boolean teste_firebase = pref.getBoolean(getString(R.string.firebase_on), false);
+        if(firebase.equals("null") || !teste_firebase) {
+            Log.e("If", firebase + "boolean "+ String.valueOf(teste_firebase));
+            Handler handler2 =  new Handler();
+            handler2.postDelayed(firebaseTokenGetter, 3000);
+        }
 
         progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
                 "Carregando informações");
@@ -240,7 +250,6 @@ public class MapActivity extends AppCompatActivity implements
 
         }
         for (Bus b : buses) {
-            Log.e(MapActivity.TAG, "Chegou aqui");
             Marker m = mMap.addMarker(
                     new MarkerOptions()
                             .position(b.getCoordinates())
@@ -250,22 +259,6 @@ public class MapActivity extends AppCompatActivity implements
             busOnScreen.add(m);
             b.setAssociatedMarker(m);
         }
-
-
-        /* Não funciona... por algum motivo? Acredito que os marcadores
-        que ficam salvos nos objetos perdem a referência no mapa, aí quando vem um novo
-        ele não remove, mesmo quando a função remove() é chamada
-        for (Bus b : buses) {
-            if (b.isActiveOnMap())
-                b.getAssociatedMarker().remove();
-            Log.e(MapActivity.TAG, "Chegou aqui");
-            Marker m = mMap.addMarker(
-                    new MarkerOptions()
-                            .position(b.getCoordinates())
-                            .title("Ônibus " + b.getId())
-            );
-            b.setAssociatedMarker(m);
-        }*/
     }
 
     /**
@@ -283,6 +276,15 @@ public class MapActivity extends AppCompatActivity implements
             SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
             int update_time = pref.getInt(getString(R.string.update_time), 3);
             handler.postDelayed(updateBus, (update_time * 1000));
+        }
+    };
+
+    Runnable firebaseTokenGetter = new Runnable(){
+        @Override
+        public void run(){
+            SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+            String firebase = pref.getString(getString(R.string.firebase), "null");
+            sendToken(firebase);
         }
     };
     /**
@@ -316,6 +318,10 @@ public class MapActivity extends AppCompatActivity implements
         startActivity(new Intent(MapActivity.this, SettingsActivity.class));;
     }
 
+    public void onClickNotifications(MenuItem item){
+        startActivity(new Intent(MapActivity.this, NotificationListActivity.class));;
+    }
+
     @Override
     public void onResume(){
         super.onResume();
@@ -335,7 +341,44 @@ public class MapActivity extends AppCompatActivity implements
     public void onDestroy(){
         super.onDestroy();
         handler.removeCallbacks(updateBus);
-        Log.e("destruido!", "dodododo");
     }
 
+    /**
+     * Registra o usuário na lista de mensagens de uma rota para receber notificações
+     * da mesma
+     * @param token_firebase token pegue em FirebaseIDService
+     */
+    public void sendToken(String token_firebase){
+        String server = getString(R.string.host_prefix) + "/routes/86/messages/register";
+        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        String token = pref.getString(getString(R.string.token), "null");
+
+        JSONObject dado = null;
+        try{
+            dado = new JSONObject("{\"registration_token_firebase\": \""+token_firebase+"\"}");
+        }
+        catch(JSONException e){
+            Log.e("deu erro", "no token firebase");
+        }
+
+        JsonObjectRequest request = new CustomJsonObjectRequest(Request.Method.POST, server, dado, token,
+                new Response.Listener<JSONObject>(){
+                    @Override
+                    public void onResponse(JSONObject Response){
+                        Log.i("Registro deu certo!", "No firebase pra mensanges");
+                        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+                        SharedPreferences.Editor edit = pref.edit();
+                        edit.putBoolean(getString(R.string.firebase_on), true);
+                        edit.apply();
+
+                    }
+                },
+                new Response.ErrorListener(){
+                    @Override
+                    public void onErrorResponse(VolleyError error){
+                        Log.e("Erro em Registro", error.toString());
+                    }
+                });
+        requestQueue.add(request);
+    }
 }

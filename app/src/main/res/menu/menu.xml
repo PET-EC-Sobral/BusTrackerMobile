@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="@string/notification_list"
+        android:onClick="onClickNotifications"
+        android:orderInCategory="100"/>
     <item android:title="@string/settings"
         android:onClick="onClickSettings"
-        android:orderInCategory="100"/>
+        android:orderInCategory="200"/>
     <item android:title="@string/about"
         android:onClick="onClickAbout"
-        android:orderInCategory="200"/>
+        android:orderInCategory="300"/>
 </menu>

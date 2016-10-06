@@ -38,11 +38,20 @@
     <string name="text_update">Intervalo de Atualizações</string>
     <string name="descrição_update">Definir o intervalo entre as atualizações dos marcadores dos ônibus no mapa em segundos. Mantenha esse valor alto para economizar dados de sua rede móvel, ou um valor baixo para máxima precisão.</string>
     <string name="text_notification">Receber Notificações</string>
-    <string name="descrição_noticação">Caso você decida não ser mais incomodado com as notificações do motorista do ônibus. Porém, você ainda poderá consultar as mensagens a partir da tela de Mensagens</string>
+    <string name="descrição_noticação">Caso você decida não ser mais incomodado com as notificações do motorista do ônibus. Porém, você ainda poderá consultar as mensagens a partir da tela de Notificações</string>
 
     <!-- Shared Preferences !-->
     <string name="preferences">Configurações</string>
     <string name="update_time">Tempo de Intervalos</string>
     <string name="notifications">Notificações</string>
     <string name="token">Token</string>
+
+    <!-- Token Firebase !-->
+    <string name="firebase">Token Firebase</string>
+    <string name="firebase_on">Firebase habilitado</string>
+
+    <!-- Activitiy de Notificações !-->
+    <string name="notification_list">Notificações</string>
+    <string name="notification_data">Notificações Salvas</string>
+    <string name="deletar_notifications">Deletar Notificações</string>
 </resources>
