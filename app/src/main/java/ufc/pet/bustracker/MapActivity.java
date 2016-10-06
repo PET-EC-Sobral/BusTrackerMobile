@@ -27,6 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -38,16 +39,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import ufc.pet.bustracker.tools.CustomJsonArrayRequest;
 import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
@@ -78,6 +69,7 @@ public class MapActivity extends AppCompatActivity implements
     // Gerenciador de conectividade
     private RequestQueue requestQueue;
     private String serverPrefix;
+    private String token;
 
     // Handler para lidar com atualização/notificação automática
     private Handler handler = new Handler();
@@ -86,6 +78,9 @@ public class MapActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        token = pref.getString(getString(R.string.token), "null");
 
         // Localiza elementos da interface
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -156,9 +151,7 @@ public class MapActivity extends AppCompatActivity implements
 
     public void getRoutesFromServer() {
         String url = serverPrefix + "/routes/86"; // apenas uma rota por que só ela está atualizada com ônibus
-        Log.e("teste", url);
         //token para teste
-        String token = "Rs1cFdbn9yOY7V\\/SYWmVIbj3PYvVZo+H7WhLd9GOQ3lCwMhgPzot2WRm4hx25i+wrrmhkX5InH5ZlbaLJ2hPLiK9ThVwgSAWSY5T\\/v1hoztNESEWtTPX+2YcwfJ\\/p7kDftRatLTDcpFZ2Dn\\/7LhEwNUn35OafWyA+Cus9wRQ0n3I6xMoWSjGXj1IAgJi44BrKex\\/PMS7lWm0ZK261Wksx4Vj0\\/YRQJgzsGMluG8HNes=";
         JsonObjectRequest jreq = new CustomJsonObjectRequest(JsonObjectRequest.Method.GET, url, null,token ,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -188,7 +181,6 @@ public class MapActivity extends AppCompatActivity implements
     public void getBusesOnRoute(int id) {
         String url = serverPrefix + "/routes/" + id + "/buses?localizations=1";
         //token para teste
-        String token = "Rs1cFdbn9yOY7V\\/SYWmVIbj3PYvVZo+H7WhLd9GOQ3lCwMhgPzot2WRm4hx25i+wrrmhkX5InH5ZlbaLJ2hPLiK9ThVwgSAWSY5T\\/v1hoztNESEWtTPX+2YcwfJ\\/p7kDftRatLTDcpFZ2Dn\\/7LhEwNUn35OafWyA+Cus9wRQ0n3I6xMoWSjGXj1IAgJi44BrKex\\/PMS7lWm0ZK261Wksx4Vj0\\/YRQJgzsGMluG8HNes=";
         JsonArrayRequest jreq = new CustomJsonArrayRequest(JsonArrayRequest.Method.GET, url, null, token,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -254,6 +246,7 @@ public class MapActivity extends AppCompatActivity implements
                             .position(b.getCoordinates())
                             .title("Ônibus " + b.getId())
             );
+            m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marcador));
             busOnScreen.add(m);
             b.setAssociatedMarker(m);
         }
@@ -289,7 +282,7 @@ public class MapActivity extends AppCompatActivity implements
             // Verifica o tempo de atualização definido pelo usuário em configurações
             SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
             int update_time = pref.getInt(getString(R.string.update_time), 3);
-            handler.postDelayed(updateBus, update_time);
+            handler.postDelayed(updateBus, (update_time * 1000));
         }
     };
     /**
@@ -323,5 +316,26 @@ public class MapActivity extends AppCompatActivity implements
         startActivity(new Intent(MapActivity.this, SettingsActivity.class));;
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+    }
+
+    /**
+     * Funções para garantir que o thread updateBus pare quando o usuário
+     * sair da activity do Mapa
+     */
+    @Override
+    public void onPause(){
+        super.onPause();
+        handler.removeCallbacks(updateBus);
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        handler.removeCallbacks(updateBus);
+        Log.e("destruido!", "dodododo");
+    }
 
 }

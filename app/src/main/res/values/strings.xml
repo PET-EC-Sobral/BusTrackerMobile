@@ -7,6 +7,9 @@
     <string name="filterVisualization">Filtrar Visualização</string>
     <string name="back">Voltar</string>
 
+    <!-- Splash !-->
+    <string name="aguarde">Aguarde, carregando informações...</string>
+
     <!-- Activity de Sobre !-->
     <string name="title_developers">Equipe de Desenvolvimento</string>
     <string name="developers">
@@ -41,4 +44,5 @@
     <string name="preferences">Configurações</string>
     <string name="update_time">Tempo de Intervalos</string>
     <string name="notifications">Notificações</string>
+    <string name="token">Token</string>
 </resources>

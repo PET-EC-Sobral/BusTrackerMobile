@@ -31,18 +31,14 @@
 
         <activity
             android:name=".MapActivity"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".AboutActivity"
             android:label="@string/about"
             android:parentActivityName=".MapActivity" />
-
         <activity
             android:name=".SettingsActivity"
             android:label="@string/configurações"
@@ -62,7 +58,16 @@
         </service> !
         -->
 
+        <activity
+            android:name=".SplashActivity"
+            android:screenOrientation="portrait"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
