@@ -2,6 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:title="@string/notification_list"
+        android:icon="@drawable/ic_notifications"
+        app:showAsAction="ifRoom"
         android:onClick="onClickNotifications"
         android:orderInCategory="100"/>
     <item android:title="@string/settings"

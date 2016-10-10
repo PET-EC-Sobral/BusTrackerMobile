@@ -9,6 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -24,6 +26,7 @@ public class NotificationListActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private RecyclerView lista_notifications;
     private NotificationsAdapter adapter;
+    TextView notificationLabel;
     private RecyclerView.LayoutManager layout_manager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,8 @@ public class NotificationListActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         String shared_retorno = pref.getString(getString(R.string.notification_data), "null");
 
+        notificationLabel = (TextView) findViewById(R.id.no_notifications_label);
+
         if(!shared_retorno.equals("null")) {
             Type tipo = new TypeToken<ArrayList<NotificationObject>>() { }.getType();
             ArrayList<NotificationObject> dados = new Gson().fromJson(shared_retorno, tipo);
@@ -48,6 +53,11 @@ public class NotificationListActivity extends AppCompatActivity {
             adapter = new NotificationsAdapter(new ArrayList<NotificationObject>());
         }
 
+        if(adapter.getItemCount() == 0){
+            notificationLabel.setVisibility(View.VISIBLE);
+        } else{
+            notificationLabel.setVisibility(View.GONE);
+        }
         layout_manager = new LinearLayoutManager(this);
 
         lista_notifications.setLayoutManager(layout_manager);
@@ -67,6 +77,6 @@ public class NotificationListActivity extends AppCompatActivity {
         edit.apply();
         adapter.update_dados(new ArrayList<NotificationObject>());
         adapter.notifyDataSetChanged();
-
+        notificationLabel.setVisibility(View.VISIBLE);
     }
 }

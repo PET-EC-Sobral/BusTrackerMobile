@@ -1,11 +1,17 @@
 <resources>
     <string name="app_name">Bus Tracker</string>
     <string name="host_prefix">http://200.129.37.177/bustracker/BusTrackerAPI/index.php</string>
+    <!--string name="host_prefix">http://santana.azurewebsites.net/BusTrackerSecureAPI/index.php</string-->
     <string name="settings">Configurações</string>
+    <string name="select_route">Selecionar rota</string>
     <string name="about">Sobre</string>
     <string name="update">Atualizar</string>
     <string name="filterVisualization">Filtrar Visualização</string>
     <string name="back">Voltar</string>
+
+    <!-- Títulos e Descrições -->
+    <string name="title_noroutes">Nenhuma rota para exibir</string>
+    <string name="desc_noroutes">Não foi possível carregar as rotas ou não há rotas disponíveis.</string>
 
     <!-- Splash !-->
     <string name="aguarde">Aguarde, carregando informações...</string>
@@ -54,4 +60,5 @@
     <string name="notification_list">Notificações</string>
     <string name="notification_data">Notificações Salvas</string>
     <string name="deletar_notifications">Deletar Notificações</string>
+    <string name="notifications_empty">Nenhuma notificação.</string>
 </resources>

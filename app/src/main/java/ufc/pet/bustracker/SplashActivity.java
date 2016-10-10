@@ -27,9 +27,6 @@ import org.json.JSONObject;
 import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
 
 public class SplashActivity extends AppCompatActivity {
-
-
-
     private SharedPreferences pref;
     private RequestQueue requestQueue;
     private String device_id;          // único para o dispositivo
@@ -55,11 +52,9 @@ public class SplashActivity extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable(){
                     @Override
                     public void run(){
-
                         iniciar();
                     }
                 }, 300);
-
             }
         }
     }
@@ -104,7 +99,7 @@ public class SplashActivity extends AppCompatActivity {
                                         "\"password\": \"dummy\"}");
         }
         catch(JSONException e){
-            Log.e("JSON", "erro???");
+            Log.e("JSON", e.getMessage());
         }
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, server, dados,
@@ -127,7 +122,7 @@ public class SplashActivity extends AppCompatActivity {
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Log.e("Erro", "deu pau no excel");
+                        Log.e("Erro", error.toString());
                         registerUserToken();
                     }
                 });
@@ -147,8 +142,7 @@ public class SplashActivity extends AppCompatActivity {
                                     "\"permission\": 1}");
         }
         catch(JSONException e){
-            Log.e("JSON registro", "errado");
-
+            Log.e("JSON registro", e.getMessage());
         }
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, server, dados,
                 new Response.Listener<JSONObject>(){
@@ -170,7 +164,7 @@ public class SplashActivity extends AppCompatActivity {
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Log.e("erro", "deu pau");
+                        Log.e("erro", error.getMessage());
                     }
                 });
         requestQueue.add(request);
@@ -206,7 +200,7 @@ public class SplashActivity extends AppCompatActivity {
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Log.e("Erro em Registro", "Vai lá ver, Firebase");
+                        Log.e("RegistroFirebase", error.getMessage());
                     }
                 });
         requestQueue.add(request);

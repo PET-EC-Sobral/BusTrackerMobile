@@ -1,9 +1,23 @@
+/**
+ *  PROJETO BUS TRACKER
+ *  UNIVERSIDADE FEDERAL DO CEARÁ
+ *  PROGRAMA DE EDUCAÇÃO TUTORIAL
+ *  SOBRAL, CE - 2016
+ *
+ *  ATIVIDADE PRINCIPAL (MapActivity)
+ *
+ *  Este arquivo contém o código da tela principal do aplicativo. Nela é possível selecionar rotas,
+ *  além de visualizar os ônibus e informações.
+ */
+
 package ufc.pet.bustracker;
 
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -13,9 +27,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -24,6 +36,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import ufc.pet.bustracker.tools.CustomJsonArrayRequest;
 import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
@@ -49,10 +65,12 @@ import ufc.pet.bustracker.ufc.pet.bustracker.types.Bus;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Route;
 
 public class MapActivity extends AppCompatActivity implements
-        View.OnClickListener,
         OnMapReadyCallback,
-        GoogleMap.OnPolylineClickListener
+        GoogleMap.OnPolylineClickListener,
+        GoogleMap.OnMarkerClickListener
 {
+    // Preferências salvas
+    SharedPreferences pref;
 
     // Tag para os logs
     public static final String TAG = MapActivity.class.getName();
@@ -62,11 +80,14 @@ public class MapActivity extends AppCompatActivity implements
     private Toolbar mToolbar;
     private TextView mInfoTitle;
     private TextView mInfoDescription;
-    private Button mUpdateButton;
+    private ProgressDialog progressDialog;
+    private FloatingActionMenu fabMenu;
+
+    // Abstrações dos ônibus e rotas
     private ArrayList<Route> routes;
     private ArrayList<Bus> buses;
     private ArrayList<Marker> busOnScreen;
-    private ProgressDialog progressDialog;
+    private Route selectedRoute = null;
 
     // Gerenciador de conectividade
     private RequestQueue requestQueue;
@@ -81,30 +102,45 @@ public class MapActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
-        token = pref.getString(getString(R.string.token), "null");
-
-        // Localiza elementos da interface
+        // Localização dos elementos da interface
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mInfoTitle = (TextView) findViewById(R.id.info_title);
         mInfoDescription = (TextView) findViewById(R.id.info_description);
-        mUpdateButton = (Button) findViewById(R.id.update_button);
+        fabMenu = (FloatingActionMenu) findViewById(R.id.floating_action_menu);
+        pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
 
+        // Configurações de conectividade
         requestQueue = Volley.newRequestQueue(getApplicationContext());
+        serverPrefix = getResources().getString(R.string.host_prefix);
+        setUpFirebase();
+
+        // Abstrações que representam os ônibus e rotas
         routes = new ArrayList<>(0);
         buses = new ArrayList<>(0);
         busOnScreen = new ArrayList<>();
-        serverPrefix = getResources().getString(R.string.host_prefix);
 
-        // Configura elementos da interface
+        // Configura os elementos da interface
         setSupportActionBar(mToolbar);
-        mUpdateButton.setOnClickListener(this);
-
-        // Atribui mapa ao elemento fragment na interface
+        fabMenu.setIconAnimated(false);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
+                "Carregando informações");
 
+        // Carrega informações iniciais
+        getRouteFromServer(86);
+
+        //TODO: O sistema de requisição de rotas múltiplas precisa ser repensado para trabalhar em conjunto com o novo botão flutuante
+        getBusesOnRoute(86);
+        handler.postDelayed(updateBus, 0);
+    }
+
+    /**
+     * Configura o app para uso do Firebase
+     */
+    private void setUpFirebase(){
+        token = pref.getString(getString(R.string.token), "null");
         String firebase = pref.getString(getString(R.string.firebase), "null");
         boolean teste_firebase = pref.getBoolean(getString(R.string.firebase_on), false);
         if(firebase.equals("null") || !teste_firebase) {
@@ -112,67 +148,50 @@ public class MapActivity extends AppCompatActivity implements
             Handler handler2 =  new Handler();
             handler2.postDelayed(firebaseTokenGetter, 3000);
         }
-
-        progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
-                "Carregando informações");
-        getRoutesFromServer();
-
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.update_button:
-                progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
-                        "Carregando informações");
-                getRoutesFromServer();
-                break;
-        }
     }
 
     /**
-     * Ações ao clicar em um polyline
+     * Controla o que acontece após uma rota ser clicada
+     * @param p Objeto polyline que representa a rota
      */
     public void onPolylineClick(Polyline p){
-        int selected = ContextCompat.getColor(getApplicationContext(), R.color.colorAccent);
-        int unselected = ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary);
-        for(Route r : routes){
-            if(r.isActiveOnMap()){
-                Polyline routePoly = r.getAssociatedPolyline();
-                if(routePoly.hashCode() == p.hashCode()) {
-                    mInfoTitle.setText(r.getName());
-                    mInfoDescription.setText(r.getDescription());
-                } else {
-                    routePoly.setColor(unselected);
-                }
+        if(selectedRoute != null){
+            Polyline routePoly = selectedRoute.getAssociatedPolyline();
+            if(routePoly.hashCode() == p.hashCode()) {
+                setTitleAndDescription(selectedRoute.getName(), selectedRoute.getDescription());
             }
         }
-        p.setColor(selected);
+
+        // Movimenta a câmera para visualizar a rota completamente
         LatLngBounds.Builder b = new LatLngBounds.Builder();
         for(LatLng l : p.getPoints()){
             b.include(l);
         }
         LatLngBounds bounds = b.build();
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
-        getBusesOnRoute(86);
-        handler.postDelayed(updateBus, 0);
     }
 
+
+    /**
+     * Carrega as rotas a partir do servidor
+     */
     public void getRoutesFromServer() {
-        String url = serverPrefix + "/routes/86"; // apenas uma rota por que só ela está atualizada com ônibus
-        //token para teste
-        JsonObjectRequest jreq = new CustomJsonObjectRequest(JsonObjectRequest.Method.GET, url, null,token ,
-                new Response.Listener<JSONObject>() {
+        String url = serverPrefix + "/routes?points=true";
+
+        JsonArrayRequest jreq = new CustomJsonArrayRequest(JsonArrayRequest.Method.GET, url, null, token,
+                new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONArray response) {
                         JSONParser parser = new JSONParser();
                         try {
-
-                            Route r = parser.parseRoute(response);
-                            routes.add(r);
-                            progressDialog.dismiss();
-                            drawRoutesOnMap();
+                            routes.clear();
+                            for(int i = 0; i < response.length(); i++) {
+                                JSONObject o = response.getJSONObject(i);
+                                Route r = parser.parseRoute(o);
+                                routes.add(r);
+                                progressDialog.dismiss();
+                            }
+                            setupRouteButtons();
                         } catch (Exception e){
                             Log.e(MapActivity.TAG, e.getMessage());
                         }
@@ -181,16 +200,102 @@ public class MapActivity extends AppCompatActivity implements
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("fuuudeu", error.toString());
+                        Log.e(MapActivity.TAG, error.toString());
                         progressDialog.dismiss();
                     }
                 });
         requestQueue.add(jreq);
     }
 
+    /**
+     * Carrega uma única rota em selecteRoute
+     * @param id Id da rota a ser carregada
+     */
+    public void getRouteFromServer(int id) {
+        String url = serverPrefix + "/routes/" + id;
+        routes.clear();
+        JsonObjectRequest jreq = new CustomJsonObjectRequest(JsonObjectRequest.Method.GET, url, null,token ,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        JSONParser parser = new JSONParser();
+                        try {
+                            Route r = parser.parseRoute(response);
+                            routes.add(r);
+                            drawRouteOnMap(r);
+                            selectedRoute = r;
+                            progressDialog.dismiss();
+                            setupRouteButtons();
+                        } catch (Exception e){
+                            Log.e(MapActivity.TAG, e.getMessage());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(MapActivity.TAG, error.toString());
+                        progressDialog.dismiss();
+                    }
+                });
+        requestQueue.add(jreq);
+    }
+
+    /**
+     * Configura o texto do título e da descrição
+     * @param title Título a ser exibido
+     * @param description Descrição a ser exibida
+     */
+    private void setTitleAndDescription(String title, String description){
+        mInfoTitle.setText(title);
+        mInfoDescription.setText(description);
+    }
+
+    /**
+     * Cria no máximo 3 botões de navegação flutuantes para as rotas
+     */
+    private void setupRouteButtons(){
+        fabMenu.setVisibility(View.INVISIBLE);
+        fabMenu.removeAllMenuButtons();
+        if(routes.isEmpty()){
+            setTitleAndDescription(getString(R.string.title_noroutes),
+                                   getString(R.string.desc_noroutes));
+        } else {
+            fabMenu.setVisibility(View.VISIBLE);
+            int max = Math.min(3, routes.size()); // No máximo 3 rotas
+            for (int i = 0; i < max; i++) {
+                FloatingActionButton fabButton = new FloatingActionButton(getBaseContext());
+                fabButton.setImageResource(R.drawable.ic_route);
+                fabButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            getRouteFromServer(routes.get(v.getId()).getId_routes());
+                            Log.e(MapActivity.TAG, "Rota " + selectedRoute.getId_routes() + " selecionada.");
+                            drawRouteOnMap(selectedRoute);
+                            getBusesOnRoute(selectedRoute.getId_routes());
+                            if (fabMenu.isOpened()) {
+                                fabMenu.toggle(true);
+                            }
+                        } catch (Exception e){
+                            Log.e(MapActivity.TAG, e.toString());
+                        }
+                    }
+                });
+                fabButton.setLabelText("Rota " + (i + 1));
+                fabButton.setId(i);
+                fabButton.setButtonSize(FloatingActionButton.SIZE_MINI);
+                fabMenu.addMenuButton(fabButton);
+            }
+        }
+    }
+
+    /**
+     * Busca no servidor as informações sobre os ônibus de uma determinada rota
+     * @param id Identificação da rota
+     */
     public void getBusesOnRoute(int id) {
         String url = serverPrefix + "/routes/" + id + "/buses?localizations=1";
-        //token para teste
         JsonArrayRequest jreq = new CustomJsonArrayRequest(JsonArrayRequest.Method.GET, url, null, token,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -212,7 +317,7 @@ public class MapActivity extends AppCompatActivity implements
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(MapActivity.TAG, error.getMessage());
+                        Log.e(MapActivity.TAG, error.toString());
                     }
                 });
         requestQueue.add(jreq);
@@ -221,19 +326,40 @@ public class MapActivity extends AppCompatActivity implements
     /**
      * Desenha as rotas e armazena os polylines associados
      */
-    public void drawRoutesOnMap(){
-        for(Route r : routes){
-            if (r.isActiveOnMap())
-                return;
-            Polyline p = mMap.addPolyline(
+    public void drawRouteOnMap(Route route){
+        Polyline p;
+        if (!route.isActiveOnMap()) {
+            cleanMap();
+            p = mMap.addPolyline(
                     new PolylineOptions()
-                            .addAll(r.getPoints())
+                            .addAll(route.getPoints())
                             .clickable(true)
                             .color(ContextCompat.getColor(
                                     getApplicationContext(),
                                     R.color.colorPrimary))
             );
-            r.setAssociatedPolyline(p);
+        } else {
+            p = route.getAssociatedPolyline();
+        }
+        LatLngBounds.Builder b = new LatLngBounds.Builder();
+        for(LatLng l : p.getPoints()){
+            b.include(l);
+        }
+        LatLngBounds bounds = b.build();
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+        setTitleAndDescription(route.getName(), route.getDescription());
+        route.setAssociatedPolyline(p);
+    }
+
+    /**
+     * Limpa o mapa, removendo todas as rotas que possam estar visíveis
+     */
+    private void cleanMap(){
+        for(Route r : routes){
+            Polyline p = r.getAssociatedPolyline();
+            if(p != null){
+                p.remove();
+            }
         }
     }
 
@@ -247,7 +373,6 @@ public class MapActivity extends AppCompatActivity implements
                 busOnScreen.get(i).remove();
             }
             busOnScreen.clear();
-
         }
         for (Bus b : buses) {
             Marker m = mMap.addMarker(
@@ -255,7 +380,10 @@ public class MapActivity extends AppCompatActivity implements
                             .position(b.getCoordinates())
                             .title("Ônibus " + b.getId())
             );
-            m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marcador));
+            m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.marcador));
+            m.hideInfoWindow();
+            LatLng local = b.getCoordinates();
+            m.setSnippet(getAdressFromLocation(local.latitude,local.longitude));
             busOnScreen.add(m);
             b.setAssociatedMarker(m);
         }
@@ -267,13 +395,10 @@ public class MapActivity extends AppCompatActivity implements
     Runnable updateBus = new Runnable(){
         @Override
         public void run(){
-            for(Route r : routes){
-                if(r.isActiveOnMap()) {
-                    getBusesOnRoute(r.getId_routes());
-                }
+            if(selectedRoute != null) {
+                getBusesOnRoute(selectedRoute.getId_routes());
             }
             // Verifica o tempo de atualização definido pelo usuário em configurações
-            SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
             int update_time = pref.getInt(getString(R.string.update_time), 3);
             handler.postDelayed(updateBus, (update_time * 1000));
         }
@@ -282,11 +407,12 @@ public class MapActivity extends AppCompatActivity implements
     Runnable firebaseTokenGetter = new Runnable(){
         @Override
         public void run(){
-            SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
             String firebase = pref.getString(getString(R.string.firebase), "null");
             sendToken(firebase);
         }
     };
+
+
     /**
      * Fornece um manipulador para o objeto do mapa
      */
@@ -294,6 +420,8 @@ public class MapActivity extends AppCompatActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnPolylineClickListener(this);
+        mMap.setOnMarkerClickListener(this);
+        mMap.getUiSettings().setMapToolbarEnabled(false);
         // Posiciona o mapa em Sobral
         LatLng sobral = new LatLng(-3.6906438,-40.3503957);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sobral, 15));
@@ -350,7 +478,6 @@ public class MapActivity extends AppCompatActivity implements
      */
     public void sendToken(String token_firebase){
         String server = getString(R.string.host_prefix) + "/routes/86/messages/register";
-        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         String token = pref.getString(getString(R.string.token), "null");
 
         JSONObject dado = null;
@@ -358,15 +485,14 @@ public class MapActivity extends AppCompatActivity implements
             dado = new JSONObject("{\"registration_token_firebase\": \""+token_firebase+"\"}");
         }
         catch(JSONException e){
-            Log.e("deu erro", "no token firebase");
+            Log.e(MapActivity.TAG, e.getMessage());
         }
 
         JsonObjectRequest request = new CustomJsonObjectRequest(Request.Method.POST, server, dado, token,
                 new Response.Listener<JSONObject>(){
                     @Override
                     public void onResponse(JSONObject Response){
-                        Log.i("Registro deu certo!", "No firebase pra mensanges");
-                        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+                        Log.i("FirebaseMensagens", "Registrado com sucesso.");
                         SharedPreferences.Editor edit = pref.edit();
                         edit.putBoolean(getString(R.string.firebase_on), true);
                         edit.apply();
@@ -376,9 +502,34 @@ public class MapActivity extends AppCompatActivity implements
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Log.e("Erro em Registro", error.toString());
+                        Log.e(MapActivity.TAG, error.getMessage());
                     }
                 });
         requestQueue.add(request);
+    }
+
+    /**
+     * Ações ao clicar em um marcador
+     * @param marker Marcador clicado
+     * @return Booleano para verificar sucesso
+     */
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        setTitleAndDescription(marker.getTitle(), marker.getSnippet());
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
+        return true;
+    }
+
+    private String getAdressFromLocation(double latitude, double longitude){
+        Geocoder geocoder = new Geocoder(getBaseContext(), Locale.getDefault());
+        String result = "";
+        try{
+            Address endereco = geocoder.getFromLocation(latitude, longitude, 1).get(0);
+            result = endereco.getAddressLine(0);
+        } catch (Exception e){
+            Log.e(MapActivity.TAG, e.toString());
+            result = "Não foi possível localizar o endereço.";
+        }
+        return result;
     }
 }

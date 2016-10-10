@@ -3,12 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".NotificationListActivity">
-
-
     <item
         android:title="@string/deletar_notifications"
         android:id="@+id/delete_button"
-        android:icon="@android:drawable/ic_menu_delete"
+        android:icon="@drawable/ic_delete"
         android:orderInCategory="1"
         android:onClick="onClickDeleteNotifications"
         app:showAsAction="ifRoom"
