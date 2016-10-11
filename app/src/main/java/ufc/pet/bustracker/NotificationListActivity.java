@@ -45,19 +45,16 @@ public class NotificationListActivity extends AppCompatActivity {
         notificationLabel = (TextView) findViewById(R.id.no_notifications_label);
 
         if(!shared_retorno.equals("null")) {
+            notificationLabel.setVisibility(View.GONE);
             Type tipo = new TypeToken<ArrayList<NotificationObject>>() { }.getType();
             ArrayList<NotificationObject> dados = new Gson().fromJson(shared_retorno, tipo);
             adapter = new NotificationsAdapter(dados);
         }
         else{
             adapter = new NotificationsAdapter(new ArrayList<NotificationObject>());
+            notificationLabel.setVisibility(View.VISIBLE);
         }
 
-        if(adapter.getItemCount() == 0){
-            notificationLabel.setVisibility(View.VISIBLE);
-        } else{
-            notificationLabel.setVisibility(View.GONE);
-        }
         layout_manager = new LinearLayoutManager(this);
 
         lista_notifications.setLayoutManager(layout_manager);
