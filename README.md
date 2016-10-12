@@ -4,6 +4,7 @@ O aplicativo mobile do projeto Bus Tracker mostra ao usuário um mapa contendo a
 
 ## Instruções de instalação
 É possível instalar o Bus Tracker a partir da Google Play Store, no link abaixo.
+
 https://play.google.com/store/apps/details?id=ufc.pet.bustracker
 
 A instalação alternativa do aplicativo mobile do projeto Bus Tracker é simples, segura, e leva poucos minutos. Basta, para isso, possuir qualquer smartphone com sistema Android 4.1 ou superior e conexão à internet, através da rede móvel ou wifi. Para a instalação alternativa, é preciso baixar o arquivo apk no site do projeto e configurar o smartphone para instalação de arquivos de fontes desconhecidas, conforme as instruções abaixo.
