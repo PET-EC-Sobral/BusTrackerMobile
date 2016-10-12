@@ -21,6 +21,10 @@ import java.util.ArrayList;
 import ufc.pet.bustracker.tools.NotificationsAdapter;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.NotificationObject;
 
+/**
+ * Activity responsável por mostrar todas as notificações recebidas pelo usuário em uma
+ * RecyclerView + Cardview. É acessada a partir do botão "Notificações" na activity principal.
+ */
 public class NotificationListActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
@@ -39,6 +43,7 @@ public class NotificationListActivity extends AppCompatActivity {
 
         lista_notifications = (RecyclerView) findViewById(R.id.recycler_view_notifications);
 
+        // Verifica se existe notificações salvas
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         String shared_retorno = pref.getString(getString(R.string.notification_data), "null");
 
@@ -61,12 +66,18 @@ public class NotificationListActivity extends AppCompatActivity {
         lista_notifications.setAdapter(adapter);
     }
 
+    // Cria o botão de deletar as notificações
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_list, menu);
         return true;
     }
 
+    /**
+     * Atualiza a Sharedpreferences para "null", significando que não existe mais notificações
+     * salvas, e atualiza o adaptador dos cardview para mostrar nada
+     * @param item o botão em si
+     */
     public void onClickDeleteNotifications(MenuItem item){
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         SharedPreferences.Editor edit = pref.edit();

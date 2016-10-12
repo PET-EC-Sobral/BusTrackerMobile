@@ -112,7 +112,8 @@ public class MapActivity extends AppCompatActivity implements
         // Configurações de conectividade
         requestQueue = Volley.newRequestQueue(getApplicationContext());
         serverPrefix = getResources().getString(R.string.host_prefix);
-        setUpFirebase();
+        token = pref.getString(getString(R.string.token), "null");
+
 
         // Abstrações que representam os ônibus e rotas
         routes = new ArrayList<>(0);
@@ -134,20 +135,6 @@ public class MapActivity extends AppCompatActivity implements
         //TODO: O sistema de requisição de rotas múltiplas precisa ser repensado para trabalhar em conjunto com o novo botão flutuante
         getBusesOnRoute(86);
         handler.postDelayed(updateBus, 0);
-    }
-
-    /**
-     * Configura o app para uso do Firebase
-     */
-    private void setUpFirebase(){
-        token = pref.getString(getString(R.string.token), "null");
-        String firebase = pref.getString(getString(R.string.firebase), "null");
-        boolean teste_firebase = pref.getBoolean(getString(R.string.firebase_on), false);
-        if(firebase.equals("null") || !teste_firebase) {
-            Log.e("If", firebase + "boolean "+ String.valueOf(teste_firebase));
-            Handler handler2 =  new Handler();
-            handler2.postDelayed(firebaseTokenGetter, 3000);
-        }
     }
 
     /**
@@ -384,6 +371,7 @@ public class MapActivity extends AppCompatActivity implements
             m.hideInfoWindow();
             LatLng local = b.getCoordinates();
             m.setSnippet(getAdressFromLocation(local.latitude,local.longitude));
+            //setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet());  // possível solução?
             busOnScreen.add(m);
             b.setAssociatedMarker(m);
         }
@@ -403,15 +391,6 @@ public class MapActivity extends AppCompatActivity implements
             handler.postDelayed(updateBus, (update_time * 1000));
         }
     };
-
-    Runnable firebaseTokenGetter = new Runnable(){
-        @Override
-        public void run(){
-            String firebase = pref.getString(getString(R.string.firebase), "null");
-            sendToken(firebase);
-        }
-    };
-
 
     /**
      * Fornece um manipulador para o objeto do mapa
@@ -473,43 +452,6 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     /**
-     * Registra o usuário na lista de mensagens de uma rota para receber notificações
-     * da mesma
-     * @param token_firebase token pegue em FirebaseIDService
-     */
-    public void sendToken(String token_firebase){
-        String server = getString(R.string.host_prefix) + "/routes/86/messages/register";
-        String token = pref.getString(getString(R.string.token), "null");
-
-        JSONObject dado = null;
-        try{
-            dado = new JSONObject("{\"registration_token_firebase\": \""+token_firebase+"\"}");
-        }
-        catch(JSONException e){
-            Log.e(MapActivity.TAG, e.getMessage());
-        }
-
-        JsonObjectRequest request = new CustomJsonObjectRequest(Request.Method.POST, server, dado, token,
-                new Response.Listener<JSONObject>(){
-                    @Override
-                    public void onResponse(JSONObject Response){
-                        Log.i("FirebaseMensagens", "Registrado com sucesso.");
-                        SharedPreferences.Editor edit = pref.edit();
-                        edit.putBoolean(getString(R.string.firebase_on), true);
-                        edit.apply();
-
-                    }
-                },
-                new Response.ErrorListener(){
-                    @Override
-                    public void onErrorResponse(VolleyError error){
-                        Log.e(MapActivity.TAG, error.getMessage());
-                    }
-                });
-        requestQueue.add(request);
-    }
-
-    /**
      * Ações ao clicar em um marcador
      * @param marker Marcador clicado
      * @return Booleano para verificar sucesso
@@ -521,6 +463,12 @@ public class MapActivity extends AppCompatActivity implements
         return true;
     }
 
+    /**
+     * Pega o endereço do ônibus a partir de suas coordenadas
+     * @param latitude latitude do ônibus
+     * @param longitude longitude do ônibus
+     * @return String com o endereço do ônibus
+     */
     private String getAdressFromLocation(double latitude, double longitude){
         Geocoder geocoder = new Geocoder(getBaseContext(), Locale.getDefault());
         String result = "";

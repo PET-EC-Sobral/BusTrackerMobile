@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Request customizado de JSON Object para suportar o envio do token do usuário
  * Created by Isaben on 22/07/2016.
  */
 public class CustomJsonObjectRequest extends JsonObjectRequest {

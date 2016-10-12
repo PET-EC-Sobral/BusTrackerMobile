@@ -15,6 +15,9 @@ import ufc.pet.bustracker.MapActivity;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Bus;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Route;
 
+/**
+ * Ferramenta para interpretar o JSON das rotas e dos ônibus
+ */
 public class JSONParser {
     public Route parseRoute(JSONObject ob){
         Route r = new Route();

@@ -13,6 +13,7 @@ import ufc.pet.bustracker.R;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.NotificationObject;
 
 /**
+ * Adaptador dos cardview de Notificações.
  * Created by Isaben on 06/10/2016.
  */
 public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.ViewHolder> {

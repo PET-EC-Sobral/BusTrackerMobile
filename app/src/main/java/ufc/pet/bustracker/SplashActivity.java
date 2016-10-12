@@ -49,6 +49,7 @@ public class SplashActivity extends AppCompatActivity {
             if (token.equals("null"))
                 getTokenIfExists();
             else {
+                setUpFirebase();
                 new Handler().postDelayed(new Runnable(){
                     @Override
                     public void run(){
@@ -116,6 +117,7 @@ public class SplashActivity extends AppCompatActivity {
                         SharedPreferences.Editor edit = pref.edit();
                         edit.putString(getString(R.string.token), newToken);
                         edit.apply();
+                        setUpFirebase();
                         iniciar();
                     }
                 },
@@ -158,6 +160,7 @@ public class SplashActivity extends AppCompatActivity {
                         SharedPreferences.Editor edit = pref.edit();
                         edit.putString(getString(R.string.token), newToken);
                         edit.apply();
+                        setUpFirebase();
                         iniciar();
                     }
                 },
@@ -178,11 +181,38 @@ public class SplashActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * Configura o app para uso do Firebase
+     */
+    private void setUpFirebase(){
+        String firebase = pref.getString(getString(R.string.firebase), "null");
+        boolean teste_firebase = pref.getBoolean(getString(R.string.firebase_on), false);
+        if(firebase.equals("null") || !teste_firebase) {
+            Handler handler2 =  new Handler();
+            handler2.postDelayed(firebaseTokenGetter, 6000);
+        }
+    }
+
+    /**
+     * Runnable que pega o token e manda pro Servidor
+     */
+    Runnable firebaseTokenGetter = new Runnable(){
+        @Override
+        public void run(){
+            String firebase = pref.getString(getString(R.string.firebase), "null");
+            sendToken(firebase);
+        }
+    };
+
+    /**
+     * Registra o usuário na lista de mensagens de uma rota para receber notificações
+     * da mesma
+     * @param token_firebase token pegue em FirebaseIDService
+     */
     public void sendToken(String token_firebase){
-        String server = getString(R.string.host_prefix) + "/routes/86/messages";
+        String server = getString(R.string.host_prefix) + "/routes/86/messages/register";
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         String token = pref.getString(getString(R.string.token), "null");
-        Log.e("token send", token);
         JSONObject dado = null;
         try{
             dado = new JSONObject("{\"registration_token_firebase\": \""+token_firebase+"\"}");
@@ -195,12 +225,20 @@ public class SplashActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject Response){
                         Log.i("Registro deu certo!", "No firebase pra mensanges");
+                        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+                        SharedPreferences.Editor edit = pref.edit();
+                        edit.putBoolean(getString(R.string.firebase_on), true);
+                        edit.apply();
                     }
                 },
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Log.e("RegistroFirebase", error.getMessage());
+                        Log.e("Erro em Firebase", error.toString());
+                        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+                        SharedPreferences.Editor edit = pref.edit();
+                        edit.putBoolean(getString(R.string.firebase_on), false);
+                        edit.apply();
                     }
                 });
         requestQueue.add(request);

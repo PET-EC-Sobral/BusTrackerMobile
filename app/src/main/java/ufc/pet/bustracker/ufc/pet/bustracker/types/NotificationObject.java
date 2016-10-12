@@ -1,6 +1,8 @@
 package ufc.pet.bustracker.ufc.pet.bustracker.types;
 
 /**
+ * Objeto de notificações, que vai pro adaptador e serve para funcionar direito
+ * os cardview
  * Created by Isaben on 06/10/2016.
  */
 public class NotificationObject {
