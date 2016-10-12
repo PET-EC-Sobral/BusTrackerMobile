@@ -3,7 +3,10 @@
 O aplicativo mobile do projeto Bus Tracker mostra ao usuário um mapa contendo as rotas, horários e outras informações do serviço de transporte *intercampi* da Universidade Federal do Ceará, em Sobral-CE. Através dele, também é possível visualizar a localização atual dos ônibus de forma próxima ao tempo real, bem como ler avisos e notificações sobre o trajeto, tais como atrasos ou desvios de rota necessários.
 
 ## Instruções de instalação
-A instalação do aplicativo mobile do projeto Bus Tracker é simples, segura, e leva poucos minutos. Basta, para isso, possuir qualquer smartphone com sistema Android 4.1 ou superior e conexão à internet, através da rede móvel ou wifi. O Bus Tracker mobile não está disponível na Google Play Store, é preciso baixar baixar o arquivo apk no site do projeto e configurar o smartphone para instalação de arquivos de fontes desconhecidas, conforme as instruções abaixo.
+É possível instalar o Bus Tracker a partir da Google Play Store, no link abaixo.
+https://play.google.com/store/apps/details?id=ufc.pet.bustracker
+
+A instalação alternativa do aplicativo mobile do projeto Bus Tracker é simples, segura, e leva poucos minutos. Basta, para isso, possuir qualquer smartphone com sistema Android 4.1 ou superior e conexão à internet, através da rede móvel ou wifi. Para a instalação alternativa, é preciso baixar o arquivo apk no site do projeto e configurar o smartphone para instalação de arquivos de fontes desconhecidas, conforme as instruções abaixo.
 
 **ATENÇÃO:** Nem todos os arquivos com extensão .apk disponíveis na internet são livres de comportamento malicioso. O arquivo apk do Bus Tracker Mobile foi testado e atende a todos os requisitos de segurança do sistema Android. Dessa forma, sua instalação não oferece riscos a seus usuários, desde que o arquivo tenha sido baixado do link oficial:
 
