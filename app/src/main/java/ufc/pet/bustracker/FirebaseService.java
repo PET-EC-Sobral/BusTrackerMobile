@@ -30,7 +30,6 @@ import ufc.pet.bustracker.ufc.pet.bustracker.types.NotificationObject;
  */
 public class FirebaseService extends FirebaseMessagingService {
 
-
     /**
      * Método que é chamado sempre que uma mensagem é recebida.
      * @param remoteMessage objeto da mensagem recebida
@@ -48,6 +47,12 @@ public class FirebaseService extends FirebaseMessagingService {
             notificar(mensagem.get("message"), mensagem.get("title"));
     }
 
+    /**
+     * Chamada sempre que o serviço receber uma mensagem, invoca uma notificação para
+     * o usuário.
+     * @param messageBody conteúdo da mensagem
+     * @param title título da notificação
+     */
     private void notificar(String messageBody, String title) {
         Intent intent = new Intent(this, SplashActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -67,13 +72,16 @@ public class FirebaseService extends FirebaseMessagingService {
         notificationManager.notify(0, notificationBuilder.build());
     }
 
+    /**
+     * Chamada sempre que uma mensagem chegar, salva a mesma na SharedPreferences que
+     * guarda todas as notificações recebidas, na intenção de serem mostradas na
+     * NotificationListActivity
+     * @param notification o Map da notificação em si
+     */
     private void listar(Map<String, String> notification){
-        Calendar c = Calendar.getInstance();
-        String data = c.getTime().toString();
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
 
-
-        NotificationObject nova = new NotificationObject(notification.get("title"), notification.get("message"), data);
+        NotificationObject nova = new NotificationObject(notification.get("title"), notification.get("message"), notification.get("date"));
         String shared_retorno = pref.getString(getString(R.string.notification_data), "null");
         SharedPreferences.Editor editor = pref.edit();
         ArrayList<NotificationObject> dados = new ArrayList<>();

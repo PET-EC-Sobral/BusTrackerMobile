@@ -371,7 +371,12 @@ public class MapActivity extends AppCompatActivity implements
             m.hideInfoWindow();
             LatLng local = b.getCoordinates();
             m.setSnippet(getAdressFromLocation(local.latitude,local.longitude));
-            //setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet());  // possível solução?
+
+            // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
+            SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+            if(pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
+                setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet());  // possível solução?
+
             busOnScreen.add(m);
             b.setAssociatedMarker(m);
         }
@@ -452,12 +457,18 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     /**
-     * Ações ao clicar em um marcador
+     * Ações ao clicar em um marcador. Ele pega o título do marcador, que contém o ID do ônibus,
+     * e salva numa sharedpreferences, pra verificar lá em cima qual é o ônibus que foi clicado
+     * e deve ter endereço atualizado no textview em MacActivity
      * @param marker Marcador clicado
      * @return Booleano para verificar sucesso
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
+        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        SharedPreferences.Editor edit = pref.edit();
+        edit.putString(getString(R.string.clicked_bus), marker.getTitle());
+        edit.apply();
         setTitleAndDescription(marker.getTitle(), marker.getSnippet());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
         return true;

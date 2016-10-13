@@ -68,4 +68,5 @@ public class Bus {
     public boolean isActiveOnMap() {
         return associatedMarker != null;
     }
+
 }

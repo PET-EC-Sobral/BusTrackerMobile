@@ -5,9 +5,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,13 +88,33 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        salvar_preferences();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        salvar_preferences();
+    }
+
+    public void salvar_preferences(){
         SharedPreferences.Editor editor = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE).edit();
         editor.putInt(getString(R.string.update_time), Integer.valueOf(intervalos.getSelectedItem().toString()));
         editor.putBoolean(getString(R.string.notifications), notifica.isChecked());
         editor.apply();
-
-        Log.e("It is", "WORRRKING");
     }
 
+    public void onClickSaveSettings(MenuItem item){
+        salvar_preferences();
+        Toast.makeText(this, "Configurações Salvas!", Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    // Cria o botão de deletar as notificações
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        return true;
+    }
 
 }

@@ -23,11 +23,11 @@
         android:layout_margin="8dp"
         android:id="@+id/no_notifications_label"
         android:text="@string/notifications_empty"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view_notifications"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:layout_marginTop="60dp" />
+        android:scrollbars="vertical" />
 
 </LinearLayout>
