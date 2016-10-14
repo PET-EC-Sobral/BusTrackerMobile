@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.internal.$Gson$Types;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -51,6 +52,7 @@ public class NotificationListActivity extends AppCompatActivity {
 
         if(!shared_retorno.equals("null")) {
             notificationLabel.setVisibility(View.GONE);
+
             Type tipo = new TypeToken<ArrayList<NotificationObject>>() { }.getType();
             ArrayList<NotificationObject> dados = new Gson().fromJson(shared_retorno, tipo);
             adapter = new NotificationsAdapter(dados);

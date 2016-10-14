@@ -54,7 +54,7 @@
                 android:id="@+id/data"
                 android:text="Data da Notificação"
                 android:textSize="12sp"
-                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 

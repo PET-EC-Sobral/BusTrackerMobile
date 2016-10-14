@@ -427,11 +427,11 @@ public class MapActivity extends AppCompatActivity implements
 
 
     public void onClickSettings(MenuItem item){
-        startActivity(new Intent(MapActivity.this, SettingsActivity.class));;
+        startActivity(new Intent(MapActivity.this, SettingsActivity.class));
     }
 
     public void onClickNotifications(MenuItem item){
-        startActivity(new Intent(MapActivity.this, NotificationListActivity.class));;
+        startActivity(new Intent(MapActivity.this, NotificationListActivity.class));
     }
 
     @Override

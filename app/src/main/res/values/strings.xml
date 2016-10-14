@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bus Tracker</string>
+    <string name="app_name">Busão GO</string>
     <string name="host_prefix">http://200.129.37.177/bustracker/BusTrackerAPI/index.php</string>
     <!--<string name="host_prefix">http://santana.azurewebsites.net/BusTrackerSecureAPI/index.php</string>-->
     <string name="settings">Configurações</string>
