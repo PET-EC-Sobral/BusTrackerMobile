@@ -38,7 +38,6 @@ public class SettingsActivity extends AppCompatActivity {
 
         // Configuração da Spinner
         List<String> lista_intervalos = new ArrayList<String>();
-        lista_intervalos.add("1");
         lista_intervalos.add("3");
         lista_intervalos.add("5");
         lista_intervalos.add("10");
@@ -55,25 +54,25 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         update_time = pref.getInt(getString(R.string.update_time), 3);
         notification = pref.getBoolean(getString(R.string.notifications), true);
-
+        if(update_time == 1) update_time = 3;
         switch(update_time){
             case 3:
-                intervalos.setSelection(1);
+                intervalos.setSelection(0);
                 break;
             case 5:
-                intervalos.setSelection(2);
+                intervalos.setSelection(1);
                 break;
             case 10:
-                intervalos.setSelection(3);
+                intervalos.setSelection(2);
                 break;
             case 15:
-                intervalos.setSelection(4);
+                intervalos.setSelection(3);
                 break;
             case 20:
-                intervalos.setSelection(5);
+                intervalos.setSelection(4);
                 break;
             case 30:
-                intervalos.setSelection(6);
+                intervalos.setSelection(5);
                 break;
             default:
                 intervalos.setSelection(0);
