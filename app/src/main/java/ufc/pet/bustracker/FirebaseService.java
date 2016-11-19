@@ -38,6 +38,7 @@ public class FirebaseService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
+        Log.e("Recebeu algo!", "feijoada");
         if (remoteMessage.getNotification() != null) {
             Log.d("Mermão", "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }

@@ -19,13 +19,13 @@
                 android:layout_height="72dp"
                 android:src="@drawable/icone_bustracker"
                 android:id="@+id/imagem_cardview"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true" />
+                android:contentDescription="Imagem de Notificação"
+                 />
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp">
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp">
 
 
             <TextView
@@ -34,7 +34,7 @@
                 android:id="@+id/title"
                 android:text="Título da Notificação"
                 android:layout_alignParentTop="true"
-                android:layout_marginTop="4dp"
+
                 android:textSize="18sp"
                 android:textStyle="bold"/>
 
@@ -54,7 +54,7 @@
                 android:id="@+id/data"
                 android:text="Data da Notificação"
                 android:textSize="12sp"
-                android:layout_alignParentTop="true"
+                android:layout_below="@id/mensagem"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 

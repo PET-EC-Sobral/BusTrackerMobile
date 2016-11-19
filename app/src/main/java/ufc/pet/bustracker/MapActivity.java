@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -432,6 +433,11 @@ public class MapActivity extends AppCompatActivity implements
 
     public void onClickNotifications(MenuItem item){
         startActivity(new Intent(MapActivity.this, NotificationListActivity.class));
+    }
+
+    public void onClickFeedback(MenuItem item){
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/e/1FAIpQLSfo_RaQPNYkS8ECXE35mSS6T4oHj0XCPdfDh6ttJ5r1Cqmy8w/viewform"));
+        startActivity(intent);
     }
 
     @Override
