@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -18,13 +18,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
 
 public class SplashActivity extends AppCompatActivity {
     private SharedPreferences pref;
@@ -49,6 +46,7 @@ public class SplashActivity extends AppCompatActivity {
 
             if (token.equals("null"))
                 getTokenIfExists();
+            /** Delay para a splash screen
             else {
                 new Handler().postDelayed(new Runnable(){
                     @Override
@@ -57,6 +55,7 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 }, 300);
             }
+             **/
         }
     }
 
