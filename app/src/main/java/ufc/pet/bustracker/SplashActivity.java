@@ -40,7 +40,8 @@ public class SplashActivity extends AppCompatActivity {
         String token; // token do usuário
 
         if(!isOnline())
-            exibir_alerta();
+            exibir_alerta(R.string.erro_aparelho_offline_title,
+                          R.string.erro_aparelho_offline_msg);
         else {
             pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
             token = pref.getString(getString(R.string.token), "null");
@@ -71,14 +72,14 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /**
-     * Exibe alerta caso não esteja conectado a internet
+     * Exibe alerta com título e mensagens definidos nos recursos
      */
-    public void exibir_alerta(){
+    public void exibir_alerta(int titleID, int msgID){
         AlertDialog.Builder alertD = new AlertDialog.Builder(this);
 
-        alertD.setMessage("Cheque sua conexão com a internet e tente novamente!\nSe ainda assim tiver problemas, contate a equipe de desenvolvimento imediatamente no link a seguir\nhttp://www.pet.ec.ufc.br/contato");
-        alertD.setTitle("Erro de Conexão!");
-        alertD.setNeutralButton("OK", new DialogInterface.OnClickListener(){
+        alertD.setMessage(msgID);
+        alertD.setTitle(titleID);
+        alertD.setNeutralButton(R.string.botao_ok, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int which){
                 finish();
             }
@@ -92,8 +93,8 @@ public class SplashActivity extends AppCompatActivity {
      * Se tiver, inicia a aplicação
      */
     public void getTokenIfExists(){
-        String server = getString(R.string.host_prefix) + "/users/tokens";
         JSONObject dados = null;
+
         try{
             dados = new JSONObject("{\"email\": \""+device_id+"\"," +
                                         "\"password\": \"dummy\"}");
@@ -102,7 +103,8 @@ public class SplashActivity extends AppCompatActivity {
             Log.e("JSON", e.getMessage());
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, server, dados,
+        String url = getString(R.string.host_prefix) + "/users/tokens";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, dados,
                 new Response.Listener<JSONObject>(){
                     String newToken;
                     @Override
@@ -122,7 +124,10 @@ public class SplashActivity extends AppCompatActivity {
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Log.e("Erro", error.toString());
+                        Log.e("Registro", error.toString());
+                        Log.d("Registro", "Este dispositivo (ID" + device_id +
+                                          ") não está registrado no servidor. Iniciando tentativa" +
+                                          " de registro");
                         registerUserToken();
                     }
                 });
@@ -164,7 +169,9 @@ public class SplashActivity extends AppCompatActivity {
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Log.e("erro", error.getMessage());
+                        exibir_alerta(R.string.erro_registro_aparelho_title,
+                                      R.string.erro_registro_aparelho_msg);
+                        Log.e("Registro", error.toString());
                     }
                 });
         requestQueue.add(request);

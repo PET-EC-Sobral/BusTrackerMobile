@@ -10,6 +10,9 @@
     <string name="filterVisualization">Filtrar Visualização</string>
     <string name="back">Voltar</string>
 
+    <!-- Botões e Navegação -->
+    <string name="botao_ok">OK</string>
+
     <!-- Títulos e Descrições -->
     <string name="title_noroutes">Nenhuma rota para exibir</string>
     <string name="desc_noroutes">Não foi possível carregar as rotas ou não há rotas disponíveis.</string>
@@ -66,4 +69,26 @@
 
     <!-- Nome ônibus Clicado -->
     <string name="clicked_bus">Ônibus Clicado</string>
+
+    <!-- Erros -->
+    <string name="erro_servidor_offline_title">Sistema offline</string>
+    <string name="erro_servidor_offline_msg">
+        Desculpe, nosso sistema provavelmente está offline.
+        Tente novamente mais tarde ou contate a equipe de desenvolvimento em
+        www.pet.ec.ufc.br/contato.
+    </string>
+
+    <string name="erro_registro_aparelho_title">Erro de registro</string>
+    <string name="erro_registro_aparelho_msg">
+        Desculpe, não foi possível registrar seu aparelho no sistema.
+        Tente novamente mais tarde ou contate a equipe de desenvolvimento em
+        www.pet.ec.ufc.br/contato.
+    </string>
+
+    <string name="erro_aparelho_offline_title">Erro de conexão</string>
+    <string name="erro_aparelho_offline_msg">
+        Cheque sua conexão com a internet e tente novamente.
+        Se ainda assim tiver problemas, contate a equipe de desenvolvimento em
+        www.pet.ec.ufc.br/contato.
+    </string>
 </resources>
