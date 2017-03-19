@@ -28,7 +28,8 @@ public class FirebaseIDService extends FirebaseInstanceIdService {
     private RequestQueue requestQueue;
     @Override
     public void onTokenRefresh() {
-        // Get updated InstanceID token.
+
+
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.e("Token", "Refreshed token: " + refreshedToken);
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -56,7 +57,7 @@ public class FirebaseIDService extends FirebaseInstanceIdService {
                 new Response.Listener<JSONObject>(){
                     @Override
                     public void onResponse(JSONObject Response){
-                        Log.i("Registro deu certo!", "No firebase pra mensanges");
+                        Log.i("Registro deu certo!", "No firebase pra mensagens");
                     }
                 },
                 new Response.ErrorListener(){

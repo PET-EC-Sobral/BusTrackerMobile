@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Busão GO</string>
     <string name="host_prefix">http://200.129.37.177/bustracker/BusTrackerAPI/index.php</string>
-    <!--<string name="host_prefix">http://santana.azurewebsites.net/BusTrackerSecureAPI/index.php</string>-->
+    <!-- <string name="host_prefix">http://santana.azurewebsites.net/BusTrackerSecureAPI/index.php</string> -->
     <string name="settings">Configurações</string>
     <string name="select_route">Selecionar rota</string>
     <string name="about">Sobre</string>
@@ -90,5 +90,20 @@
         Cheque sua conexão com a internet e tente novamente.
         Se ainda assim tiver problemas, contate a equipe de desenvolvimento em
         www.pet.ec.ufc.br/contato.
+    </string>
+
+    <string name="erro_botao_home_title">Erro de interface</string>
+    <string name="erro_botao_home_msg">
+        Reinstale o aplicativo e tente novamente.
+        Se ainda tiver problemas, contate a equipe de desenvolvimento em
+        www.pet.ec.ufc.br/contato
+        informando: descrição de como ocorreu o erro e
+        modelo do aparelho.
+    </string>
+
+    <string name="erro_indisponivel_title">Serviço indisponível</string>
+    <string name="erro_indisponivel_msg">
+        Serviço encontra-se indisponível no momento.
+        Contate a equipe de desenvolvimento para mais detalhes.
     </string>
 </resources>

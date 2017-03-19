@@ -49,11 +49,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.temporal.ChronoUnit;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 import ufc.pet.bustracker.tools.CustomJsonArrayRequest;
@@ -80,6 +84,7 @@ public class MapActivity extends AppCompatActivity implements
     private TextView mInfoDescription;
     private ProgressDialog progressDialog;
     private FloatingActionMenu fabMenu;
+    private TextView busUpdateInfo;
 
     // Abstrações dos ônibus e rotas
     private ArrayList<Route> routes;
@@ -100,12 +105,14 @@ public class MapActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+
         // Localização dos elementos da interface
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mInfoTitle = (TextView) findViewById(R.id.info_title);
         mInfoDescription = (TextView) findViewById(R.id.info_description);
         fabMenu = (FloatingActionMenu) findViewById(R.id.floating_action_menu);
         pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        busUpdateInfo = (TextView) findViewById(R.id.info_update);
 
         // Configurações de conectividade
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -159,7 +166,10 @@ public class MapActivity extends AppCompatActivity implements
 
     /**
      * Carrega as rotas a partir do servidor
-     */
+     * DEPRECATED
+     *
+    */
+    /*
     public void getRoutesFromServer() {
         String url = serverPrefix + "/routes?points=true";
 
@@ -191,7 +201,7 @@ public class MapActivity extends AppCompatActivity implements
                 });
         requestQueue.add(jreq);
     }
-
+    */
     /**
      * Carrega uma única rota em selecteRoute
      * @param id Id da rota a ser carregada
@@ -220,6 +230,7 @@ public class MapActivity extends AppCompatActivity implements
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(MapActivity.TAG, error.toString());
+                        setTitleAndDescription(getString(R.string.erro_indisponivel_title), getString(R.string.erro_indisponivel_msg));
                         progressDialog.dismiss();
                     }
                 });
@@ -234,6 +245,29 @@ public class MapActivity extends AppCompatActivity implements
     private void setTitleAndDescription(String title, String description){
         mInfoTitle.setText(title);
         mInfoDescription.setText(description);
+        busUpdateInfo.setVisibility(View.GONE);
+    }
+
+    /**
+     * Configura o texto do título e da descrição, com adição do último update do ônibus, quando
+     * necessário
+     * @param title Título a ser exibido
+     * @param description Descrição a ser exibida
+     * @param lastUpdate último update do ônibus
+     */
+    private void setTitleAndDescription(String title, String description, LocalDateTime lastUpdate){
+        mInfoTitle.setText(title);
+        mInfoDescription.setText(description);
+        LocalDateTime atual = LocalDateTime.now();
+
+        long horas_passadas = ChronoUnit.HOURS.between(lastUpdate, atual);
+        long minutos_passados = (ChronoUnit.MINUTES.between(lastUpdate, atual)) % (60*horas_passadas);
+        long segundos_passados = (ChronoUnit.MINUTES.between(lastUpdate, atual)) % (60*minutos_passados);
+
+        busUpdateInfo.setText("Última atualização a "+String.valueOf(horas_passadas)+
+                                " horas, "+String.valueOf(minutos_passados)+
+                                " minutos e "+String.valueOf(segundos_passados)+" segundos.");
+
     }
 
     /**
@@ -373,7 +407,7 @@ public class MapActivity extends AppCompatActivity implements
             // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
             SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
             if(pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
-                setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet());  // possível solução?
+                setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
 
             busOnScreen.add(m);
             b.setAssociatedMarker(m);
@@ -432,11 +466,6 @@ public class MapActivity extends AppCompatActivity implements
         startActivity(new Intent(MapActivity.this, NotificationListActivity.class));
     }
 
-    public void onClickFeedback(MenuItem item){
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/e/1FAIpQLSfo_RaQPNYkS8ECXE35mSS6T4oHj0XCPdfDh6ttJ5r1Cqmy8w/viewform"));
-        startActivity(intent);
-    }
-
     @Override
     public void onResume(){
         super.onResume();
@@ -485,7 +514,7 @@ public class MapActivity extends AppCompatActivity implements
      */
     private String getAdressFromLocation(double latitude, double longitude){
         Geocoder geocoder = new Geocoder(getBaseContext(), Locale.getDefault());
-        String result = "";
+        String result;
         try{
             Address endereco = geocoder.getFromLocation(latitude, longitude, 1).get(0);
             result = endereco.getAddressLine(0);

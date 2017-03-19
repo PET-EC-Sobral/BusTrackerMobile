@@ -7,6 +7,8 @@ import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,7 +42,7 @@ public class JSONParser {
     }
 
     public Bus parseBus(JSONObject ob) {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd kk:mm:ss");
+
         Bus b = new Bus();
         try {
             b.setId(ob.getInt("id_bus"));
@@ -49,10 +51,10 @@ public class JSONParser {
             JSONObject locationInfo = lastLocalizations.getJSONObject(0);
             Double lat = locationInfo.getDouble("latitude");
             Double lng = locationInfo.getDouble("longitude");
-            Date d;
-            d = df.parse(locationInfo.getString("date"));
             b.setCoordinates(new LatLng(lat, lng));
-            b.setLastUpdate(d);
+
+            String ultima_atualizacao = locationInfo.getString("date");
+            b.setLastUpdate(LocalDateTime.parse(ultima_atualizacao, DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss")));
         } catch (Exception e) {
             Log.e(MapActivity.TAG, e.getMessage());
         }

@@ -1,7 +1,9 @@
 package ufc.pet.bustracker;
 
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -12,6 +14,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -28,7 +31,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_settings);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        try {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        catch(NullPointerException exception){
+            exibir_alerta(R.string.erro_botao_home_title, R.string.erro_botao_home_msg);
+        }
 
         notifica = (Switch) findViewById(R.id.notificacoes_switch);
 
@@ -53,30 +61,16 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         update_time = pref.getInt(getString(R.string.update_time), 3);
         notification = pref.getBoolean(getString(R.string.notifications), true);
-        if(update_time == 1) update_time = 3;
-        switch(update_time){
-            case 3:
-                intervalos.setSelection(0);
-                break;
-            case 5:
-                intervalos.setSelection(1);
-                break;
-            case 10:
-                intervalos.setSelection(2);
-                break;
-            case 15:
-                intervalos.setSelection(3);
-                break;
-            case 20:
-                intervalos.setSelection(4);
-                break;
-            case 30:
-                intervalos.setSelection(5);
-                break;
-            default:
-                intervalos.setSelection(0);
-                break;
-        }
+        // Interpreta o valor salvo (3-30), e interpreta pra colocar na GUI
+        Hashtable<Integer, Integer> tempo_real = new Hashtable<>();
+        tempo_real.put(3, 0);
+        tempo_real.put(5, 1);
+        tempo_real.put(10, 2);
+        tempo_real.put(15, 3);
+        tempo_real.put(20, 4);
+        tempo_real.put(30, 5);
+        intervalos.setSelection(tempo_real.get(update_time));
+
         notifica.setChecked(notification);
     }
 
@@ -113,6 +107,19 @@ public class SettingsActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
+    }
+
+    public void exibir_alerta(int titleID, int msgID){
+        AlertDialog.Builder alertD = new AlertDialog.Builder(this);
+
+        alertD.setMessage(msgID);
+        alertD.setTitle(titleID);
+        alertD.setNeutralButton(R.string.botao_ok, new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int which){
+                finish();
+            }
+        });
+        alertD.show();
     }
 
 }

@@ -60,6 +60,14 @@
                 android:layout_marginRight="0dp"
                 android:layout_marginTop="2dp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/info_update"
+                android:layout_marginTop="2dp"
+                />
+
         </LinearLayout>
 
         <com.github.clans.fab.FloatingActionMenu

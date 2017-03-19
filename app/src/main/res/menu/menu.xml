@@ -12,7 +12,5 @@
     <item android:title="@string/about"
         android:onClick="onClickAbout"
         android:orderInCategory="300"/>
-    <item android:title="@string/feedback"
-        android:onClick="onClickFeedback"
-        android:orderInCategory="400"/>
+
 </menu>

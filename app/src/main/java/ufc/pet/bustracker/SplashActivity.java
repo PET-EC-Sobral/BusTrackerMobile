@@ -19,6 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +33,8 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        AndroidThreeTen.init(this);
+
         device_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         String token; // token do usuário
@@ -46,7 +49,7 @@ public class SplashActivity extends AppCompatActivity {
 
             if (token.equals("null"))
                 getTokenIfExists();
-            /** Delay para a splash screen
+            //Delay para a splash screen
             else {
                 new Handler().postDelayed(new Runnable(){
                     @Override
@@ -55,7 +58,7 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 }, 300);
             }
-             **/
+
         }
     }
 
@@ -103,6 +106,7 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         String url = getString(R.string.host_prefix) + "/users/tokens";
+        Log.e("teste", "FUNCIONA PELO AMOR DE DEUS");
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, dados,
                 new Response.Listener<JSONObject>(){
                     String newToken;
