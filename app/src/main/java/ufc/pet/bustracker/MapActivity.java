@@ -30,8 +30,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -45,6 +47,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -105,7 +108,6 @@ public class MapActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-
         // Localização dos elementos da interface
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mInfoTitle = (TextView) findViewById(R.id.info_title);
@@ -118,7 +120,6 @@ public class MapActivity extends AppCompatActivity implements
         requestQueue = Volley.newRequestQueue(getApplicationContext());
         serverPrefix = getResources().getString(R.string.host_prefix);
         token = pref.getString(getString(R.string.token), "null");
-
 
         // Abstrações que representam os ônibus e rotas
         routes = new ArrayList<>(0);
@@ -133,6 +134,7 @@ public class MapActivity extends AppCompatActivity implements
         mapFragment.getMapAsync(this);
         progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
                 "Carregando informações");
+        fabMenu.setVisibility(View.INVISIBLE);
 
         // Carrega informações iniciais
         getRouteFromServer(86);
@@ -219,21 +221,25 @@ public class MapActivity extends AppCompatActivity implements
                             routes.add(r);
                             drawRouteOnMap(r);
                             selectedRoute = r;
-                            progressDialog.dismiss();
                             setupRouteButtons();
                         } catch (Exception e){
                             Log.e(MapActivity.TAG, e.getMessage());
+                            setTitleAndDescription(getString(R.string.erro_info_indisponivel_title),
+                                                   getString(R.string.erro_info_indisponivel_msg));
                         }
+                        progressDialog.dismiss();
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(MapActivity.TAG, error.toString());
-                        setTitleAndDescription(getString(R.string.erro_indisponivel_title), getString(R.string.erro_indisponivel_msg));
+                        setTitleAndDescription(getString(R.string.erro_indisponivel_title),
+                                               getString(R.string.erro_indisponivel_msg));
                         progressDialog.dismiss();
                     }
                 });
+        //progressDialog.dismiss();
         requestQueue.add(jreq);
     }
 
@@ -435,12 +441,49 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnPolylineClickListener(this);
-        mMap.setOnMarkerClickListener(this);
-        mMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
+        googleMap.setOnPolylineClickListener(this);
+        googleMap.setOnMarkerClickListener(this);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+
+        Marker ufc_mucambinho = googleMap.addMarker(
+                new MarkerOptions()
+                .position(new LatLng(-3.6931337,-40.3549609))
+                .title("UFC Mucambinho")
+        );
+        ufc_mucambinho.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ufc_mucambinho_small));
+
+        Marker ufc_famed = googleMap.addMarker(
+                new MarkerOptions()
+                        .position(new LatLng(-3.6818927,-40.337298))
+                        .title("UFC FAMED")
+        );
+        ufc_famed.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ufc_famed_small));
+
+        Marker arco = googleMap.addMarker(
+                new MarkerOptions()
+                        .position(new LatLng(-3.6836746,-40.3434405))
+                        .title("Arco N. Sra. de Fátima")
+        );
+        arco.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.arco_small));
+
+        Marker mercado = googleMap.addMarker(
+                new MarkerOptions()
+                        .position(new LatLng(-3.6868121,-40.3529572))
+                        .title("Mercado Central")
+        );
+        mercado.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.mercado_small));
+
+        Marker ced = googleMap.addMarker(
+                new MarkerOptions()
+                        .position(new LatLng(-3.6832558,-40.3409093))
+                        .title("Centro de Educação à Distância")
+        );
+        ced.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ced_small));
         // Posiciona o mapa em Sobral
-        LatLng sobral = new LatLng(-3.6906438,-40.3503957);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sobral, 15));
+        // DEPRECATED - Atributos são definidos via XML
+        //LatLng sobral = new LatLng(-3.6906438,-40.3503957);
+        //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sobral, 15));
     }
 
     /**
@@ -497,11 +540,15 @@ public class MapActivity extends AppCompatActivity implements
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
-        SharedPreferences.Editor edit = pref.edit();
-        edit.putString(getString(R.string.clicked_bus), marker.getTitle());
-        edit.apply();
-        setTitleAndDescription(marker.getTitle(), marker.getSnippet());
+        if(marker.getTitle().contains("Ônibus")) {
+            SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+            SharedPreferences.Editor edit = pref.edit();
+            edit.putString(getString(R.string.clicked_bus), marker.getTitle());
+            edit.apply();
+            setTitleAndDescription(marker.getTitle(), marker.getSnippet());
+        } else {
+            setTitleAndDescription(marker.getTitle(), "Local de parada");
+        }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
         return true;
     }

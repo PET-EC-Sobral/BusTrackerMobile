@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -21,7 +22,7 @@ import ufc.pet.bustracker.ufc.pet.bustracker.types.Route;
  * Ferramenta para interpretar o JSON das rotas e dos ônibus
  */
 public class JSONParser {
-    public Route parseRoute(JSONObject ob){
+    public Route parseRoute(JSONObject ob) throws JSONException {
         Route r = new Route();
         try{
             r.setId_routes(ob.getInt("id_routes"));
@@ -34,14 +35,13 @@ public class JSONParser {
                 int id = id_buses.getInt(i);
                 r.getId_buses().add(id);
             }
-
-        } catch (Exception e){
-            Log.e(MapActivity.TAG, e.getMessage());
+        } catch (Throwable t){
+            throw t;
         }
         return r;
     }
 
-    public Bus parseBus(JSONObject ob) {
+    public Bus parseBus(JSONObject ob) throws JSONException {
 
         Bus b = new Bus();
         try {
@@ -55,8 +55,8 @@ public class JSONParser {
 
             String ultima_atualizacao = locationInfo.getString("date");
             b.setLastUpdate(LocalDateTime.parse(ultima_atualizacao, DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm:ss")));
-        } catch (Exception e) {
-            Log.e(MapActivity.TAG, e.getMessage());
+        } catch (Throwable t) {
+            throw t;
         }
         return b;
     }

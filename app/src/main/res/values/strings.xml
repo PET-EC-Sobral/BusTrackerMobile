@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Busão GO</string>
     <string name="host_prefix">http://200.129.37.177/bustracker/BusTrackerAPI/index.php</string>
-    <!-- <string name="host_prefix">http://santana.azurewebsites.net/BusTrackerSecureAPI/index.php</string> -->
+    <!--string name="host_prefix">http://santana.azurewebsites.net/BusTrackerSecureAPI/index.php</string-->
     <string name="settings">Configurações</string>
     <string name="select_route">Selecionar rota</string>
     <string name="about">Sobre</string>
@@ -104,6 +104,12 @@
     <string name="erro_indisponivel_title">Serviço indisponível</string>
     <string name="erro_indisponivel_msg">
         Serviço encontra-se indisponível no momento.
+        Contate a equipe de desenvolvimento para mais detalhes.
+    </string>
+
+    <string name="erro_info_indisponivel_title">Informações indisponíveis</string>
+    <string name="erro_info_indisponivel_msg">
+        Não foi possível localizar informações sobre as rotas.
         Contate a equipe de desenvolvimento para mais detalhes.
     </string>
 </resources>
