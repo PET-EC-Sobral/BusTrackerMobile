@@ -462,7 +462,7 @@ public class MapActivity extends AppCompatActivity implements
 
         Marker arco = googleMap.addMarker(
                 new MarkerOptions()
-                        .position(new LatLng(-3.6836746,-40.3434405))
+                        .position(new LatLng(-3.6856522,-40.3443335))
                         .title("Arco N. Sra. de Fátima")
         );
         arco.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.arco_small));
@@ -506,6 +506,7 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     public void onClickNotifications(MenuItem item){
+        Log.d("MAP_LOCATION", mMap.getCameraPosition().toString());
         startActivity(new Intent(MapActivity.this, NotificationListActivity.class));
     }
 
