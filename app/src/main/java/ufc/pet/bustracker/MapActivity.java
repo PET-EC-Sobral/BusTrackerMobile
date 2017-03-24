@@ -16,6 +16,8 @@ package ufc.pet.bustracker;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -28,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -88,6 +91,10 @@ public class MapActivity extends AppCompatActivity implements
     private ProgressDialog progressDialog;
     private FloatingActionMenu fabMenu;
     private TextView busUpdateInfo;
+    private ImageView imageInfo;
+
+    // Controle de cliques
+    private boolean lastClickWasABus = false;
 
     // Abstrações dos ônibus e rotas
     private ArrayList<Route> routes;
@@ -115,6 +122,7 @@ public class MapActivity extends AppCompatActivity implements
         fabMenu = (FloatingActionMenu) findViewById(R.id.floating_action_menu);
         pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         busUpdateInfo = (TextView) findViewById(R.id.info_update);
+        imageInfo = (ImageView) findViewById(R.id.image_info);
 
         // Configurações de conectividade
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -134,7 +142,6 @@ public class MapActivity extends AppCompatActivity implements
         mapFragment.getMapAsync(this);
         progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
                 "Carregando informações");
-        fabMenu.setVisibility(View.INVISIBLE);
 
         // Carrega informações iniciais
         getRouteFromServer(86);
@@ -149,6 +156,7 @@ public class MapActivity extends AppCompatActivity implements
      * @param p Objeto polyline que representa a rota
      */
     public void onPolylineClick(Polyline p){
+        imageInfo.setVisibility(View.GONE);
         if(selectedRoute != null){
             Polyline routePoly = selectedRoute.getAssociatedPolyline();
             if(routePoly.hashCode() == p.hashCode()) {
@@ -163,6 +171,7 @@ public class MapActivity extends AppCompatActivity implements
         }
         LatLngBounds bounds = b.build();
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+        lastClickWasABus = false;
     }
 
 
@@ -285,7 +294,7 @@ public class MapActivity extends AppCompatActivity implements
         if(routes.isEmpty()){
             setTitleAndDescription(getString(R.string.title_noroutes),
                                    getString(R.string.desc_noroutes));
-        } else {
+        } else if (routes.size() > 1){
             fabMenu.setVisibility(View.VISIBLE);
             int max = Math.min(3, routes.size()); // No máximo 3 rotas
             for (int i = 0; i < max; i++) {
@@ -400,9 +409,11 @@ public class MapActivity extends AppCompatActivity implements
             busOnScreen.clear();
         }
         for (Bus b : buses) {
+
             Marker m = mMap.addMarker(
                     new MarkerOptions()
                             .position(b.getCoordinates())
+                            .zIndex(500)
                             .title("Ônibus " + b.getId())
             );
             m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.marcador));
@@ -412,7 +423,7 @@ public class MapActivity extends AppCompatActivity implements
 
             // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
             SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
-            if(pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
+            if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
                 setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
 
             busOnScreen.add(m);
@@ -448,7 +459,7 @@ public class MapActivity extends AppCompatActivity implements
 
         Marker ufc_mucambinho = googleMap.addMarker(
                 new MarkerOptions()
-                .position(new LatLng(-3.6931337,-40.3549609))
+                .position(new LatLng(-3.6941749,-40.354952))
                 .title("UFC Mucambinho")
         );
         ufc_mucambinho.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ufc_mucambinho_small));
@@ -469,7 +480,7 @@ public class MapActivity extends AppCompatActivity implements
 
         Marker mercado = googleMap.addMarker(
                 new MarkerOptions()
-                        .position(new LatLng(-3.6868121,-40.3529572))
+                        .position(new LatLng(-3.686351,-40.3529675))
                         .title("Mercado Central")
         );
         mercado.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.mercado_small));
@@ -480,6 +491,7 @@ public class MapActivity extends AppCompatActivity implements
                         .title("Centro de Educação à Distância")
         );
         ced.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ced_small));
+
         // Posiciona o mapa em Sobral
         // DEPRECATED - Atributos são definidos via XML
         //LatLng sobral = new LatLng(-3.6906438,-40.3503957);
@@ -547,8 +559,29 @@ public class MapActivity extends AppCompatActivity implements
             edit.putString(getString(R.string.clicked_bus), marker.getTitle());
             edit.apply();
             setTitleAndDescription(marker.getTitle(), marker.getSnippet());
+            lastClickWasABus = true;
+            imageInfo.setVisibility(View.GONE);
         } else {
-            setTitleAndDescription(marker.getTitle(), "Local de parada");
+            setTitleAndDescription(marker.getTitle(), "Ponto de Referência");
+            imageInfo.setVisibility(View.VISIBLE);
+            lastClickWasABus = false;
+            switch (marker.getTitle()){
+                case "UFC Mucambinho":
+                    imageInfo.setBackgroundResource(R.drawable.mucambinho_round);
+                    break;
+                case "UFC FAMED":
+                    imageInfo.setBackgroundResource(R.drawable.famed_round);
+                    break;
+                case "Arco N. Sra. de Fátima":
+                    imageInfo.setBackgroundResource(R.drawable.arco_round);
+                    break;
+                case "Mercado Central":
+                    imageInfo.setBackgroundResource(R.drawable.mercado_round);
+                    break;
+                case "Centro de Educação à Distância":
+                    imageInfo.setBackgroundResource(R.drawable.ced_round);
+                    break;
+            }
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
         return true;
