@@ -459,10 +459,11 @@ public class MapActivity extends AppCompatActivity implements
 
         Marker ufc_mucambinho = googleMap.addMarker(
                 new MarkerOptions()
-                .position(new LatLng(-3.6941749,-40.354952))
+                .position(new LatLng(-3.6932625,-40.3553395))
                 .title("UFC Mucambinho")
+                .anchor(0.5f, 0f)
         );
-        ufc_mucambinho.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ufc_mucambinho_small));
+        ufc_mucambinho.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ufc_mucambinho_inv));
 
         Marker ufc_famed = googleMap.addMarker(
                 new MarkerOptions()
@@ -475,8 +476,9 @@ public class MapActivity extends AppCompatActivity implements
                 new MarkerOptions()
                         .position(new LatLng(-3.6856522,-40.3443335))
                         .title("Arco N. Sra. de Fátima")
+                        .anchor(0.5f, 0f)
         );
-        arco.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.arco_small));
+        arco.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.arco_small_inv));
 
         Marker mercado = googleMap.addMarker(
                 new MarkerOptions()
