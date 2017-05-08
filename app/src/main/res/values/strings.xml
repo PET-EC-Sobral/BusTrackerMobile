@@ -35,8 +35,8 @@
         Luís Eduardo Araripe Gomes da Silva\nIális Cavalcante de Paula Júnior
     </string>
 
-    <string name="site_projeto">Mais sobre o Projeto\n<a href="https://www.pet.ec.ufc.br/bustracker/">www.pet.ec.ufc.br/bustracker</a></string>
-    <string name="site_web_app">Web App\n<a href="https://www.pet.ec.ufc.br/bus-tracker-web-client/">www.pet.ec.ufc.br/bus-tracker-web-client</a></string>
+    <string name="site_projeto">Mais sobre o Projeto\n<a href="http://www.busaogo.ufc.br">www.busaogo.ufc.br</a></string>
+    <string name="site_web_app">Web App\n<a href="https://www.busaogo.ufc.br/bus-tracker-web-client/">www.busaogo.ufc.br/bus-tracker-web-client/</a></string>
     <string name="site_pet"><a href="https://www.pet.ec.ufc.br">www.pet.ec.ufc.br</a></string>
     <string name="site_ufc_sobral"><a href="https://www.sobral.ufc.br/">www.sobral.ufc.br</a></string>
     <string name="site_ufc"><a href="https://www.ufc.br/">www.ufc.br</a></string>

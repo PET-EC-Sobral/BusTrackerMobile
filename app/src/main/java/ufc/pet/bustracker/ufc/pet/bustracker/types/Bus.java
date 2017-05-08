@@ -41,6 +41,9 @@ public class Bus {
 
     public void setCoordinates(LatLng coordinates) {
         this.coordinates = coordinates;
+        if(this.associatedMarker != null){
+            this.associatedMarker.setPosition(this.coordinates);
+        }
     }
 
     public double getVelocity() {
@@ -69,6 +72,20 @@ public class Bus {
 
     public boolean isActiveOnMap() {
         return associatedMarker != null;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        boolean isEqual = false;
+        if(obj != null && obj instanceof Bus){
+            isEqual = ((Bus) obj).getId() == this.getId();
+        }
+        return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getId();
     }
 
 }

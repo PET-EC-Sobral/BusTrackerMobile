@@ -335,16 +335,24 @@ public class MapActivity extends AppCompatActivity implements
                     @Override
                     public void onResponse(JSONArray response) {
                         JSONParser parser = new JSONParser();
+                        Log.d("ONIBUS", "Recebido informacoes do servidor");
                         try {
-                            buses.clear();
                             for (int i = 0; i < response.length(); i++) {
                                 JSONObject ob = response.getJSONObject(i);
                                 Bus b = parser.parseBus(ob);
-                                buses.add(b);
+                                if(buses.contains(b)){
+                                    Log.d("ONIBUS", "Marcador existe, sera atualizado.");
+                                    Bus busOnMap = buses.get(buses.indexOf(b));
+                                    busOnMap.setCoordinates(b.getCoordinates());
+                                } else {
+                                    buses.add(b);
+                                    markBusOnMap(b);
+                                    Log.d("ONIBUS", "Sem marcador associado para o onibus, um novo sera criado.");
+                                }
                             }
-                            markBusesOnMap();
+                            // markBusesOnMap();
                         } catch (Exception e) {
-                            Log.e(MapActivity.TAG, e.getMessage());
+                            Log.e("ONIBUS", e.getMessage());
                         }
                     }
                 },
@@ -401,34 +409,23 @@ public class MapActivity extends AppCompatActivity implements
      * Marca os ônibus no mapa de acordo com os que estão ativos, dado o vetor buses
      * que é preenchido no recebimento da informação do servidor na funçao getBusesOnRoute.
      */
-    public void markBusesOnMap() {
-        if(busOnScreen.size() != 0){
-            for(int i = 0; i < busOnScreen.size(); i++){
-                busOnScreen.get(i).remove();
-            }
-            busOnScreen.clear();
-        }
-        for (Bus b : buses) {
+    public void markBusOnMap(Bus b) {
+        Marker m = mMap.addMarker(
+                new MarkerOptions()
+                        .position(b.getCoordinates())
+                        .zIndex(500)
+                        .title("Ônibus " + b.getId())
+        );
+        m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.marcador));
+        m.hideInfoWindow();
+        LatLng local = b.getCoordinates();
+        m.setSnippet(getAdressFromLocation(local.latitude,local.longitude));
+        b.setAssociatedMarker(m);
 
-            Marker m = mMap.addMarker(
-                    new MarkerOptions()
-                            .position(b.getCoordinates())
-                            .zIndex(500)
-                            .title("Ônibus " + b.getId())
-            );
-            m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.marcador));
-            m.hideInfoWindow();
-            LatLng local = b.getCoordinates();
-            m.setSnippet(getAdressFromLocation(local.latitude,local.longitude));
-
-            // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
-            SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
-            if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
-                setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
-
-            busOnScreen.add(m);
-            b.setAssociatedMarker(m);
-        }
+        // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
+        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
+            setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
     }
 
     /**
