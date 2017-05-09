@@ -48,17 +48,20 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.threeten.bp.Duration;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.temporal.ChronoUnit;
 
@@ -275,13 +278,24 @@ public class MapActivity extends AppCompatActivity implements
         mInfoDescription.setText(description);
         LocalDateTime atual = LocalDateTime.now();
 
-        long horas_passadas = ChronoUnit.HOURS.between(lastUpdate, atual);
-        long minutos_passados = (ChronoUnit.MINUTES.between(lastUpdate, atual)) % (60*horas_passadas);
-        long segundos_passados = (ChronoUnit.MINUTES.between(lastUpdate, atual)) % (60*minutos_passados);
+        Log.d("ONIBUS", "Ultima atualizacao as "+lastUpdate.toString()+".");
+        Log.d("ONIBUS", "Hora atual "+atual.toString()+".");
+        long tempo_total = Duration.between(lastUpdate, atual).toMillis()/1000;
+        Log.d("ONIBUS", "Tempo total "+atual.toString()+".");
+        long minutos = tempo_total / 60;
+        long horas = minutos / 60;
+        long segundos = tempo_total - minutos * 60 - horas * 3600;
 
-        busUpdateInfo.setText("Última atualização a "+String.valueOf(horas_passadas)+
-                                " horas, "+String.valueOf(minutos_passados)+
-                                " minutos e "+String.valueOf(segundos_passados)+" segundos.");
+        busUpdateInfo.setVisibility(View.VISIBLE);
+        String ultimaAtualizacao = "Última atualização há ";
+        if(horas > 0) {
+            ultimaAtualizacao += String.valueOf(horas) + " horas, ";
+        }
+        if(minutos > 0){
+            ultimaAtualizacao += String.valueOf(minutos)+ " minutos e ";
+        }
+        ultimaAtualizacao += String.valueOf(segundos)+" segundos.";
+        busUpdateInfo.setText(ultimaAtualizacao);
 
     }
 
@@ -335,15 +349,14 @@ public class MapActivity extends AppCompatActivity implements
                     @Override
                     public void onResponse(JSONArray response) {
                         JSONParser parser = new JSONParser();
-                        Log.d("ONIBUS", "Recebido informacoes do servidor");
+                        Log.d("ONIBUS", "Recebidas informacoes do servidor");
                         try {
                             for (int i = 0; i < response.length(); i++) {
                                 JSONObject ob = response.getJSONObject(i);
                                 Bus b = parser.parseBus(ob);
                                 if(buses.contains(b)){
                                     Log.d("ONIBUS", "Marcador existe, sera atualizado.");
-                                    Bus busOnMap = buses.get(buses.indexOf(b));
-                                    busOnMap.setCoordinates(b.getCoordinates());
+                                    updateBusOnMap(b);
                                 } else {
                                     buses.add(b);
                                     markBusOnMap(b);
@@ -426,6 +439,23 @@ public class MapActivity extends AppCompatActivity implements
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
             setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
+    }
+
+    /**
+     * Atualiza os ônibus no mapa
+     */
+    public void updateBusOnMap(Bus b) {
+        Bus busOnMap = buses.get(buses.indexOf(b));
+        LatLng coordinates = b.getCoordinates();
+        Marker m = busOnMap.getAssociatedMarker();
+        String address = getAdressFromLocation(coordinates.latitude, coordinates.longitude);
+        m.setSnippet(address);
+        busOnMap.setCoordinates(coordinates);
+
+        // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
+        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
+        if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
+            setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());
     }
 
     /**
@@ -593,14 +623,14 @@ public class MapActivity extends AppCompatActivity implements
      * @return String com o endereço do ônibus
      */
     private String getAdressFromLocation(double latitude, double longitude){
+        Log.d("LOCAL", "Obtendo informacoes do endereco");
         Geocoder geocoder = new Geocoder(getBaseContext(), Locale.getDefault());
-        String result;
+        String result = "Não foi possível localizar o endereço.";
         try{
             Address endereco = geocoder.getFromLocation(latitude, longitude, 1).get(0);
             result = endereco.getAddressLine(0);
         } catch (Exception e){
             Log.e(MapActivity.TAG, e.toString());
-            result = "Não foi possível localizar o endereço.";
         }
         return result;
     }
