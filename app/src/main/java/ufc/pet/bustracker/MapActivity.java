@@ -282,9 +282,9 @@ public class MapActivity extends AppCompatActivity implements
         Log.d("ONIBUS", "Hora atual "+atual.toString()+".");
         long tempo_total = Duration.between(lastUpdate, atual).toMillis()/1000;
         Log.d("ONIBUS", "Tempo total "+atual.toString()+".");
-        long minutos = tempo_total / 60;
-        long horas = minutos / 60;
-        long segundos = tempo_total - minutos * 60 - horas * 3600;
+        long horas = tempo_total / 3600;
+        long minutos = (tempo_total % 3600)/60;
+        long segundos = ((tempo_total % 3600)%60);
 
         busUpdateInfo.setVisibility(View.VISIBLE);
         String ultimaAtualizacao = "Última atualização há ";
