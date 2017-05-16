@@ -11,7 +11,7 @@ A instalação alternativa do aplicativo mobile do projeto Bus Tracker é simple
 
 **ATENÇÃO:** Nem todos os arquivos com extensão .apk disponíveis na internet são livres de comportamento malicioso. O arquivo apk do Bus Tracker Mobile foi testado e atende a todos os requisitos de segurança do sistema Android. Dessa forma, sua instalação não oferece riscos a seus usuários, desde que o arquivo tenha sido baixado do link oficial:
 
-[Link para o arquivo bustracker_beta.apk](https://github.com/AbnerSN/BusTrackerMobile/raw/master/release/bustracker_beta.apk)
+[Link para o arquivo busao_go.apk](https://github.com/PET-EC-Sobral/BusTrackerMobile/tree/bugOnibus/app/busao_go.apk)
 
 1. Em seu celular, abra “Configurações” e clique no item “Segurança”;
 2. Em “Segurança”, marque a opção “Fontes desconhecidas”, para permitir a instalação de aplicativos que não estejam disponíveis na Google Play. **ATENÇÃO:** Uma vez concluída a instalação, é altamente recomendável desativar a opção “Fontes desconhecidas” novamente. A nomenclatura das opções pode variar, de acordo com o fabricante do aparelho;
