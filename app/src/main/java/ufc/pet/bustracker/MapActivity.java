@@ -14,15 +14,18 @@ package ufc.pet.bustracker;
 
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
-import android.net.Uri;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,10 +36,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -48,25 +49,20 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.threeten.bp.Duration;
 import org.threeten.bp.LocalDateTime;
-import org.threeten.bp.temporal.ChronoUnit;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
 
 import ufc.pet.bustracker.tools.CustomJsonArrayRequest;
@@ -74,6 +70,7 @@ import ufc.pet.bustracker.tools.CustomJsonObjectRequest;
 import ufc.pet.bustracker.tools.JSONParser;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Bus;
 import ufc.pet.bustracker.ufc.pet.bustracker.types.Route;
+import ufc.pet.bustracker.tools.CustomLocationListener;
 
 public class MapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -95,6 +92,7 @@ public class MapActivity extends AppCompatActivity implements
     private FloatingActionMenu fabMenu;
     private TextView busUpdateInfo;
     private ImageView imageInfo;
+    private FloatingActionButton fabGps;
 
     // Controle de cliques
     private boolean lastClickWasABus = false;
@@ -113,6 +111,11 @@ public class MapActivity extends AppCompatActivity implements
     // Handler para lidar com atualização/notificação automática
     private Handler handler = new Handler();
 
+    // Listener para localização do usuário
+    private CustomLocationListener locationListener;
+
+    public static final int PERMISSION_GPS = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,6 +129,7 @@ public class MapActivity extends AppCompatActivity implements
         pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         busUpdateInfo = (TextView) findViewById(R.id.info_update);
         imageInfo = (ImageView) findViewById(R.id.image_info);
+        fabGps = (FloatingActionButton) findViewById(R.id.gps);
 
         // Configurações de conectividade
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -143,6 +147,26 @@ public class MapActivity extends AppCompatActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        fabGps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+
+                if ( manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+                    int permissionCheck = ContextCompat.checkSelfPermission(view.getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION);
+                    if(permissionCheck == PackageManager.PERMISSION_GRANTED){
+                        Log.d("GPS", "Pode usar");
+                        manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                    }
+                    else{
+                        ActivityCompat.requestPermissions(MapActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                                PERMISSION_GPS);
+
+                    }
+                }
+            }
+        });
         progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
                 "Carregando informações");
 
@@ -459,16 +483,33 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     /**
+     * Verifica se o usuário está conectado a Internet
+     * @return true se está, false se não
+     */
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    /**
      * Atualizar os ônibus automaticamente no mapa
      */
     Runnable updateBus = new Runnable(){
         @Override
         public void run(){
-            if(selectedRoute != null) {
-                getBusesOnRoute(selectedRoute.getId_routes());
-            }
             // Verifica o tempo de atualização definido pelo usuário em configurações
             int update_time = pref.getInt(getString(R.string.update_time), 3);
+            if(isOnline()) {
+                if (selectedRoute != null) {
+                    getBusesOnRoute(selectedRoute.getId_routes());
+                }
+            }
+            else{
+                mInfoTitle.setText(getString(R.string.erro_indisponivel_title));
+                mInfoDescription.setText((getString(R.string.erro_indisponivel_msg)));
+            }
             handler.postDelayed(updateBus, (update_time * 1000));
         }
     };
@@ -633,5 +674,26 @@ public class MapActivity extends AppCompatActivity implements
             Log.e(MapActivity.TAG, e.toString());
         }
         return result;
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_GPS: {
+                // Verifica se a permissão foi concedida
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+                    Log.d("GPS", "Pode usar");
+
+                    // Na real essa linha é inútil, mas o Studio não deixa o código executar sem ela...
+                    int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+                    manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+                }
+
+
+            }
+        }
     }
 }

@@ -39,10 +39,10 @@ public class SplashActivity extends AppCompatActivity {
 
         String token; // token do usuário
 
-        if(!isOnline())
+        /*if(!isOnline())
             exibir_alerta(R.string.erro_aparelho_offline_title,
-                          R.string.erro_aparelho_offline_msg);
-        else {
+                          R.string.erro_aparelho_offline_msg); */
+        //else {
             pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
             token = pref.getString(getString(R.string.token), "null");
             requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -59,7 +59,7 @@ public class SplashActivity extends AppCompatActivity {
                 }, 300);
             }
 
-        }
+        //}
     }
 
     /**
