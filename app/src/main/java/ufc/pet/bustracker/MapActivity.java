@@ -120,7 +120,7 @@ public class MapActivity extends AppCompatActivity implements
     private CustomLocationListener locationListener;
 
     public static final int PERMISSION_GPS = 1;
-    final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,6 +150,7 @@ public class MapActivity extends AppCompatActivity implements
 
         // Configuração do Listener do GPS
         locationListener = new CustomLocationListener(mMap);
+
 
         // Configura os elementos da interface
         setSupportActionBar(mToolbar);
@@ -598,7 +599,7 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     public void onClickGps(MenuItem item){
-
+        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
         if ( manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
             int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
             if(permissionCheck == PackageManager.PERMISSION_GRANTED){
@@ -640,6 +641,7 @@ public class MapActivity extends AppCompatActivity implements
     public void onPause(){
         super.onPause();
         handler.removeCallbacks(updateBus);
+        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
         manager.removeUpdates(locationListener);
     }
 
@@ -647,6 +649,7 @@ public class MapActivity extends AppCompatActivity implements
     public void onDestroy(){
         super.onDestroy();
         handler.removeCallbacks(updateBus);
+        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
         manager.removeUpdates(locationListener);
     }
 
@@ -720,7 +723,7 @@ public class MapActivity extends AppCompatActivity implements
                 // Verifica se a permissão foi concedida
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("GPS", "Pode usar");
-
+                    final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
                     // Na real essa linha é inútil, mas o Studio não deixa o código executar sem ela...
                     int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
                     manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
