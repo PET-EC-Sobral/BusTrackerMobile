@@ -13,13 +13,16 @@
 package ufc.pet.bustracker;
 
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -35,6 +38,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -61,6 +65,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.threeten.bp.Duration;
 import org.threeten.bp.LocalDateTime;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -91,8 +96,8 @@ public class MapActivity extends AppCompatActivity implements
     private ProgressDialog progressDialog;
     private FloatingActionMenu fabMenu;
     private TextView busUpdateInfo;
+    private TextView busDistanceInfo;
     private ImageView imageInfo;
-    private FloatingActionButton fabGps;
 
     // Controle de cliques
     private boolean lastClickWasABus = false;
@@ -129,7 +134,8 @@ public class MapActivity extends AppCompatActivity implements
         pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
         busUpdateInfo = (TextView) findViewById(R.id.info_update);
         imageInfo = (ImageView) findViewById(R.id.image_info);
-        fabGps = (FloatingActionButton) findViewById(R.id.gps);
+        busDistanceInfo = (TextView) findViewById(R.id.info_distance);
+
 
         // Configurações de conectividade
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -141,32 +147,17 @@ public class MapActivity extends AppCompatActivity implements
         buses = new ArrayList<>(0);
         busOnScreen = new ArrayList<>();
 
+        // Configuração do Listener do GPS
+        locationListener = new CustomLocationListener(mMap);
+
         // Configura os elementos da interface
         setSupportActionBar(mToolbar);
         fabMenu.setIconAnimated(false);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        busDistanceInfo.setVisibility(View.GONE);
 
-        fabGps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
-
-                if ( manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
-                    int permissionCheck = ContextCompat.checkSelfPermission(view.getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION);
-                    if(permissionCheck == PackageManager.PERMISSION_GRANTED){
-                        Log.d("GPS", "Pode usar");
-                        manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                    }
-                    else{
-                        ActivityCompat.requestPermissions(MapActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                                PERMISSION_GPS);
-
-                    }
-                }
-            }
-        });
         progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
                 "Carregando informações");
 
@@ -461,8 +452,21 @@ public class MapActivity extends AppCompatActivity implements
 
         // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
-        if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
+        if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle())) {
             setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
+            try{
+                double distance = (locationListener.distance(b.getCoordinates())) / 1000;
+
+                String result = String.format(Locale.getDefault(), "%.2f", distance);
+
+                busDistanceInfo.setText(getString(R.string.distance_bus).replace("${distance}", result));
+                busDistanceInfo.setVisibility(View.VISIBLE);
+            }
+            catch(Exception e){
+                busDistanceInfo.setVisibility(View.GONE);
+                
+            }
+        }
     }
 
     /**
@@ -592,6 +596,35 @@ public class MapActivity extends AppCompatActivity implements
         startActivity(new Intent(MapActivity.this, NotificationListActivity.class));
     }
 
+    public void onClickGps(MenuItem item){
+        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+
+        if ( manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+            int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+            if(permissionCheck == PackageManager.PERMISSION_GRANTED){
+                Log.d("GPS", "Pode usar");
+                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            }
+            else{
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSION_GPS);
+
+            }
+        }
+        else{
+            AlertDialog.Builder alertD = new AlertDialog.Builder(this);
+
+            alertD.setMessage(getString(R.string.erro_gps_msg));
+            alertD.setTitle(getString(R.string.erro_gps_title));
+            alertD.setNeutralButton("OK", new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialog, int which){
+                    dialog.dismiss();
+                }
+            });
+            alertD.show();
+        }
+    }
+
     @Override
     public void onResume(){
         super.onResume();
@@ -689,7 +722,11 @@ public class MapActivity extends AppCompatActivity implements
                     // Na real essa linha é inútil, mas o Studio não deixa o código executar sem ela...
                     int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
                     manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                    Toast.makeText(this, "Permissão concedida para acessar o GPS!", Toast.LENGTH_SHORT).show();
 
+                }
+                else{
+                    Toast.makeText(this, "Permissão não concedida para acessar o GPS.", Toast.LENGTH_SHORT).show();
                 }
 
 

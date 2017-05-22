@@ -70,6 +70,9 @@
     <!-- Nome ônibus Clicado -->
     <string name="clicked_bus">Ônibus Clicado</string>
 
+    <!-- Texto sobre distância do ônibus -->
+    <string name="distance_bus">Encontra-se a ${distance}km de você!</string>
+
     <!-- Erros -->
     <string name="erro_servidor_offline_title">Sistema offline</string>
     <string name="erro_servidor_offline_msg">
@@ -111,5 +114,12 @@
     <string name="erro_info_indisponivel_msg">
         Não foi possível localizar informações sobre as rotas.
         Contate a equipe de desenvolvimento para mais detalhes.
+    </string>
+
+    <string name="erro_gps_title">GPS Desativado!</string>
+    <string name="erro_gps_msg">
+        Por favor, ative o GPS do seu aparelho para utilizar essa funcionalidade.
+        Com ela, você poderá visualizar sua localização, e ter uma distância aproximada entre você
+        e o ônibus.
     </string>
 </resources>

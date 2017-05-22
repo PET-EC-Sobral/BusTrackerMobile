@@ -6,6 +6,11 @@
         app:showAsAction="ifRoom"
         android:onClick="onClickNotifications"
         android:orderInCategory="100"/>
+    <item android:title="GPS"
+        android:icon="@drawable/ic_my_location"
+        app:showAsAction="ifRoom"
+        android:onClick="onClickGps"
+        android:orderInCategory="400"/>
     <item android:title="@string/settings"
         android:onClick="onClickSettings"
         android:orderInCategory="200"/>

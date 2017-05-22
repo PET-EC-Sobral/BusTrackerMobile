@@ -9,18 +9,39 @@ import android.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class CustomLocationListener implements LocationListener{
 
     private Location user_location;
+    private GoogleMap map;
+    private Marker user_marker;
 
-    public CustomLocationListener(){
+    public CustomLocationListener(GoogleMap map){
         user_location = null;
+        user_marker = null;
+        this.map = map;
     }
 
     public void onLocationChanged(Location location){
         user_location = location;
+        if(user_marker == null){
+            user_marker = map.addMarker(
+                    new MarkerOptions()
+                            .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                            .zIndex(500)
+                            .title("Usuário")
+            );
+            user_marker.setSnippet("Usuário");
+        }
+        else{
+            user_marker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+        }
+
+
     }
 
     public void onProviderEnabled(String provider){
@@ -28,11 +49,10 @@ public class CustomLocationListener implements LocationListener{
     }
 
     public void onProviderDisabled(String provider){
-        Log.d("LOCATION LISTENER", "DESATIVADO!");
-    }
+        if(user_marker != null){
+            user_marker.remove();
+        }
 
-    public Location getUser_location(){
-        return user_location;
     }
 
     public double distance(LatLng bus){
