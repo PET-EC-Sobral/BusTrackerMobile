@@ -120,6 +120,7 @@ public class MapActivity extends AppCompatActivity implements
     private CustomLocationListener locationListener;
 
     public static final int PERMISSION_GPS = 1;
+    final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -464,7 +465,7 @@ public class MapActivity extends AppCompatActivity implements
             }
             catch(Exception e){
                 busDistanceInfo.setVisibility(View.GONE);
-                
+
             }
         }
     }
@@ -597,7 +598,6 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     public void onClickGps(MenuItem item){
-        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
         if ( manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
             int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
@@ -629,6 +629,7 @@ public class MapActivity extends AppCompatActivity implements
     public void onResume(){
         super.onResume();
         handler.postDelayed(updateBus, 350);
+
     }
 
     /**
@@ -639,12 +640,14 @@ public class MapActivity extends AppCompatActivity implements
     public void onPause(){
         super.onPause();
         handler.removeCallbacks(updateBus);
+        manager.removeUpdates(locationListener);
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
         handler.removeCallbacks(updateBus);
+        manager.removeUpdates(locationListener);
     }
 
     /**
@@ -716,7 +719,6 @@ public class MapActivity extends AppCompatActivity implements
             case PERMISSION_GPS: {
                 // Verifica se a permissão foi concedida
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
                     Log.d("GPS", "Pode usar");
 
                     // Na real essa linha é inútil, mas o Studio não deixa o código executar sem ela...
