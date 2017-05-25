@@ -1,6 +1,6 @@
 # Aplicativo mobile do projeto Busão GO
 
-O aplicativo mobile do projeto Busão GO mostra ao usuário um mapa contendo as rotas, horários e outras informações do serviço de transporte *intercampi* da Universidade Federal do Ceará, em Sobral-CE. Através dele, também é possível visualizar a localização atual dos ônibus de forma próxima ao tempo real, bem como ler avisos e notificações sobre o trajeto, tais como atrasos ou desvios de rota necessários.
+O aplicativo mobile do projeto Busão GO mostra ao usuário um mapa contendo as rotas, horários e outras informações do serviço de transporte intracampus da Universidade Federal do Ceará, em Sobral-CE. Através dele, também é possível visualizar a localização atual dos ônibus de forma próxima ao tempo real, bem como ler avisos e notificações sobre o trajeto, tais como atrasos ou desvios de rota necessários.
 
 ## Instruções de instalação
 É possível instalar o Busão GO a partir da Google Play Store, no link abaixo.
