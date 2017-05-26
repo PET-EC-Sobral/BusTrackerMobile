@@ -120,6 +120,7 @@ public class MapActivity extends AppCompatActivity implements
     private CustomLocationListener locationListener;
 
     public static final int PERMISSION_GPS = 1;
+    private boolean USER_LOCATION_ACTIVATED = false;
 
 
     @Override
@@ -148,8 +149,7 @@ public class MapActivity extends AppCompatActivity implements
         buses = new ArrayList<>(0);
         busOnScreen = new ArrayList<>();
 
-        // Configuração do Listener do GPS
-        locationListener = new CustomLocationListener(mMap);
+
 
 
         // Configura os elementos da interface
@@ -160,8 +160,7 @@ public class MapActivity extends AppCompatActivity implements
         mapFragment.getMapAsync(this);
         busDistanceInfo.setVisibility(View.GONE);
 
-        progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",
-                "Carregando informações");
+        //progressDialog = ProgressDialog.show(MapActivity.this, "Aguarde...",   "Carregando informações");
 
         // Carrega informações iniciais
         getRouteFromServer(86);
@@ -256,7 +255,7 @@ public class MapActivity extends AppCompatActivity implements
                             setTitleAndDescription(getString(R.string.erro_info_indisponivel_title),
                                                    getString(R.string.erro_info_indisponivel_msg));
                         }
-                        progressDialog.dismiss();
+                        //progressDialog.dismiss();
                     }
                 },
                 new Response.ErrorListener() {
@@ -265,7 +264,7 @@ public class MapActivity extends AppCompatActivity implements
                         Log.e(MapActivity.TAG, error.toString());
                         setTitleAndDescription(getString(R.string.erro_indisponivel_title),
                                                getString(R.string.erro_indisponivel_msg));
-                        progressDialog.dismiss();
+                        //progressDialog.dismiss();
                     }
                 });
         //progressDialog.dismiss();
@@ -281,6 +280,7 @@ public class MapActivity extends AppCompatActivity implements
         mInfoTitle.setText(title);
         mInfoDescription.setText(description);
         busUpdateInfo.setVisibility(View.GONE);
+        busDistanceInfo.setVisibility(View.GONE);
     }
 
     /**
@@ -452,23 +452,7 @@ public class MapActivity extends AppCompatActivity implements
         m.setSnippet(getAdressFromLocation(local.latitude,local.longitude));
         b.setAssociatedMarker(m);
 
-        // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
-        SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
-        if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle())) {
-            setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
-            try{
-                double distance = (locationListener.distance(b.getCoordinates())) / 1000;
-
-                String result = String.format(Locale.getDefault(), "%.2f", distance);
-
-                busDistanceInfo.setText(getString(R.string.distance_bus).replace("${distance}", result));
-                busDistanceInfo.setVisibility(View.VISIBLE);
-            }
-            catch(Exception e){
-                busDistanceInfo.setVisibility(View.GONE);
-
-            }
-        }
+        infoClickedBus(b, m);
     }
 
     /**
@@ -482,10 +466,33 @@ public class MapActivity extends AppCompatActivity implements
         m.setSnippet(address);
         busOnMap.setCoordinates(coordinates);
 
+        infoClickedBus(b, m);
+    }
+
+    /**
+     * Verifica se o ônibus em questão foi o clicado, e atualiza as informações de descrição
+     * @param b ônibus da iteração atual
+     * @param m marcador correspondente ao ônibus
+     */
+    public void infoClickedBus(Bus b, Marker m){
         // Verifica se o ônibus da iteração atual é o que foi clicado, pra atualizar o textview
         SharedPreferences pref = getSharedPreferences(getString(R.string.preferences), MODE_PRIVATE);
-        if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle()))
-            setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());
+        if(lastClickWasABus && pref.getString(getString(R.string.clicked_bus), "null").equals(m.getTitle())) {
+            setTitleAndDescription("Ônibus " + b.getId(), m.getSnippet(), b.getLastUpdate());  // possível solução?
+            Log.d("ONIBUS", "CLICADO");
+            try{
+                double distance = (locationListener.distance(b.getCoordinates())) / 1000;
+                Log.d("FUNCIONA GPS", "É PRA TÁ FUNCIOANNDO");
+                String result = String.format(Locale.getDefault(), "%.2f", distance);
+
+                busDistanceInfo.setText(getString(R.string.distance_bus).replace("${distance}", result));
+                busDistanceInfo.setVisibility(View.VISIBLE);
+            }
+            catch(Exception e){
+                busDistanceInfo.setVisibility(View.GONE);
+
+            }
+        }
     }
 
     /**
@@ -568,6 +575,8 @@ public class MapActivity extends AppCompatActivity implements
         );
         ced.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ced_small));
 
+        // Configuração do Listener do GPS
+        locationListener = new CustomLocationListener(mMap);
         // Posiciona o mapa em Sobral
         // DEPRECATED - Atributos são definidos via XML
         //LatLng sobral = new LatLng(-3.6906438,-40.3503957);
@@ -599,30 +608,37 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     public void onClickGps(MenuItem item){
-        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
-        if ( manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
-            int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
-            if(permissionCheck == PackageManager.PERMISSION_GRANTED){
-                Log.d("GPS", "Pode usar");
-                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-            }
-            else{
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                        PERMISSION_GPS);
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if(!USER_LOCATION_ACTIVATED) {
 
+            if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+                if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("GPS", "Pode usar");
+                    manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                    USER_LOCATION_ACTIVATED = true;
+                } else {
+                    ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                            PERMISSION_GPS);
+
+                }
+            } else {
+                AlertDialog.Builder alertD = new AlertDialog.Builder(this);
+
+                alertD.setMessage(getString(R.string.erro_gps_msg));
+                alertD.setTitle(getString(R.string.erro_gps_title));
+                alertD.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                alertD.show();
             }
         }
         else{
-            AlertDialog.Builder alertD = new AlertDialog.Builder(this);
-
-            alertD.setMessage(getString(R.string.erro_gps_msg));
-            alertD.setTitle(getString(R.string.erro_gps_title));
-            alertD.setNeutralButton("OK", new DialogInterface.OnClickListener(){
-                public void onClick(DialogInterface dialog, int which){
-                    dialog.dismiss();
-                }
-            });
-            alertD.show();
+            locationListener.onProviderDisabled("DESATIVAR");
+            manager.removeUpdates(locationListener);
+            USER_LOCATION_ACTIVATED = false;
         }
     }
 
@@ -728,6 +744,7 @@ public class MapActivity extends AppCompatActivity implements
                     int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
                     manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
                     Toast.makeText(this, "Permissão concedida para acessar o GPS!", Toast.LENGTH_SHORT).show();
+                    USER_LOCATION_ACTIVATED = true;
 
                 }
                 else{

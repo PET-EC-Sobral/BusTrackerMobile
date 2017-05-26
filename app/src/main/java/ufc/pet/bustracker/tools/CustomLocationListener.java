@@ -10,9 +10,18 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import ufc.pet.bustracker.R;
+
+/**
+ * Listener responsável por ouvir as atualizações da localização do usuário,
+ * caso este decida ativar o GPS.
+ * Responsável também por calcular a distância do usuário ao ônibus clicado.
+ */
 
 public class CustomLocationListener implements LocationListener{
 
@@ -36,6 +45,7 @@ public class CustomLocationListener implements LocationListener{
                             .title("Usuário")
             );
             user_marker.setSnippet("Usuário");
+            user_marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.marcador_pessoa));
         }
         else{
             user_marker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
@@ -49,8 +59,11 @@ public class CustomLocationListener implements LocationListener{
     }
 
     public void onProviderDisabled(String provider){
+        Log.d("LOCATION LISTENER", "DESATIVADO!");
         if(user_marker != null){
             user_marker.remove();
+            user_marker = null;
+            user_location = null;
         }
 
     }
